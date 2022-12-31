@@ -1,8 +1,7 @@
 package roboter;
 
-import ev3dev.actuators.*;
 import ev3dev.actuators.lego.motors.*;
-import lejos.hardware.lcd.*;
+import ev3dev.robotics.tts.*;
 import lejos.hardware.port.*;
 
 /*
@@ -18,10 +17,11 @@ Ideen:
 
 public class Main {
     public static void main(String[] args) {
-        NXTRegulatedMotor leftLeg = new NXTRegulatedMotor(MotorPort.B);
-        NXTRegulatedMotor rightLeg = new NXTRegulatedMotor(MotorPort.C);
-        GraphicsLCD screen = LCD.getInstance();
-        String data = "Hello World!";
-        screen.drawChars(data.toCharArray(),0,data.length(),0,0,0);
+        //NXTRegulatedMotor leftLeg = new NXTRegulatedMotor(MotorPort.B);
+        //NXTRegulatedMotor rightLeg = new NXTRegulatedMotor(MotorPort.C);
+        Espeak espeak = new Espeak();
+        espeak.setVoice(Espeak.VOICE_ENGLISH);
+        espeak.setMessage("Hello World!");
+        espeak.say();
     }
 }

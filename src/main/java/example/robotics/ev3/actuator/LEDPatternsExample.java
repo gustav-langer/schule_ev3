@@ -23,7 +23,7 @@ public class LEDPatternsExample {
 
         LOGGER.info("Left patterns");
 
-        LED led = new EV3Led(EV3Led.LEFT);
+        LED led = new EV3Led(EV3Led.Direction.LEFT);
         led.setPattern(0);
         Delay.msDelay(1000);
         led.setPattern(1);
@@ -40,7 +40,7 @@ public class LEDPatternsExample {
 
         LOGGER.info("Right patterns");
 
-        LED led = new EV3Led(EV3Led.RIGHT);
+        LED led = new EV3Led(EV3Led.Direction.RIGHT);
 
         led.setPattern(0);
         Delay.msDelay(1000);
