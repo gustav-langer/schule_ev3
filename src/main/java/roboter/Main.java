@@ -41,3 +41,31 @@ public class Main {
         bein2.waitComplete();
     }
 }
+
+/*
+import lejos.nxt.*;
+
+public class Spagatt {
+
+  public static void main(String[] args) {
+    Motor.A.setSpeed(900);
+    Motor.C.setSpeed(900);
+
+    Motor.A.forward();
+    Motor.C.backward();
+
+    try {
+      Thread.sleep(2000);
+    } catch (InterruptedException e) {
+      // Nichts tun
+    }
+
+    Motor.A.stop();
+    Motor.C.stop();
+  }
+
+}
+
+
+
+ */
