@@ -31,4 +31,13 @@ public class Main {
         Delay.msDelay(100);
         bein.rotate(-70);
     }
+
+    static void spagat(RegulatedMotor bein1, RegulatedMotor bein2) {
+        bein1.setSpeed(200);
+        bein2.setSpeed(200);
+        bein1.rotate(90,true);
+        bein2.rotate(-90,true);
+        bein1.waitComplete();
+        bein2.waitComplete();
+    }
 }
