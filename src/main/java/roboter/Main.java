@@ -1,8 +1,9 @@
 package roboter;
 
 import ev3dev.actuators.lego.motors.*;
-import ev3dev.robotics.tts.*;
 import lejos.hardware.port.*;
+import lejos.robotics.*;
+import lejos.utility.*;
 
 /*
 Was der Roboter können muss:
@@ -17,11 +18,17 @@ Ideen:
 
 public class Main {
     public static void main(String[] args) {
-        //NXTRegulatedMotor leftLeg = new NXTRegulatedMotor(MotorPort.B);
-        //NXTRegulatedMotor rightLeg = new NXTRegulatedMotor(MotorPort.C);
-        Espeak espeak = new Espeak();
-        espeak.setVoice(Espeak.VOICE_ENGLISH);
-        espeak.setMessage("Hello World!");
-        espeak.say();
+        NXTRegulatedMotor linkesBein = new NXTRegulatedMotor(MotorPort.B);
+        NXTRegulatedMotor rechtesBein = new NXTRegulatedMotor(MotorPort.C);
+        NXTRegulatedMotor arme = new NXTRegulatedMotor(MotorPort.A);
+        tanzen1(linkesBein, arme);
+        tanzen1(rechtesBein, arme);
+    }
+
+    static void tanzen1(RegulatedMotor bein, RegulatedMotor arm) {
+        bein.setSpeed(200);
+        bein.rotate(70);
+        Delay.msDelay(100);
+        bein.rotate(-70);
     }
 }
