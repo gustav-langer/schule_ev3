@@ -85,6 +85,8 @@ task removePreviousJar {
             session(remotes.ev3dev) {
                 println "rm /home/robot/" + "${rootProject.name}" + "-" + version + ".jar "
                 execute "rm /home/robot/" + "${rootProject.name}" + "-" + version + ".jar "
+                println "rm /home/robot/run_" + "${rootProject.name}" + "-" + version + ".sh"
+                execute "rm /home/robot/run_" + "${rootProject.name}" + "-" + version + ".sh"
             }
         }
     }
@@ -95,6 +97,8 @@ task deploy {
         ssh.run {
             session(remotes.ev3dev) {
                 put from: "${projectDir}/build/libs/" + "${rootProject.name}" + "-" + version + ".jar", into: "/home/robot/"
+                execute "echo java -jar /home/robot/" + "${rootProject.name}" + "-" + version + ".jar > /home/robot/run_" + "${rootProject.name}" + "-" + version + ".sh"
+                execute "chmod +x /home/robot/run_" + "${rootProject.name}" + "-" + version + ".sh"
             }
         }
     }
