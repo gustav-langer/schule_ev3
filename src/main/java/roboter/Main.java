@@ -1,6 +1,5 @@
 package roboter;
 
-import ev3dev.actuators.LCD;
 import ev3dev.actuators.lego.motors.NXTRegulatedMotor;
 import ev3dev.robotics.tts.Espeak;
 import ev3dev.sensors.ev3.EV3TouchSensor;
@@ -25,76 +24,94 @@ Ideen:
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        Roboter robo = new Roboter();
-        //lcd.setFont(lcd.getFont().deriveFont((float)lcd.getFont().getSize()*10));
-        robo.lcd.setColor(255, 255, 255);
-        robo.lcd.drawRect(0, 0, robo.lcd.getWidth(), robo.lcd.getHeight());
-        robo.lcd.setColor(0);
-        robo.lcd.drawString("Please wait...", 35, 10, 0);
-        robo.lcd.getFont();
+        Robot robot = new Robot();
+        /*//lcd.setFont(lcd.getFont().deriveFont((float)lcd.getFont().getSize()*10));
+        robot.lcd.setColor(255, 255, 255);
+        robot.lcd.drawRect(0, 0, robot.lcd.getWidth(), robot.lcd.getHeight());
+        robot.lcd.setColor(0);
+        robot.lcd.drawString("Please wait...", 35, 10, 0);
+        robot.lcd.getFont();
         //lcd.drawImage(JarResource.loadImage(JarResource.JAVA_DUKE_IMAGE_NAME), 35, 10, 0);
-        robo.lcd.refresh();
+        robot.lcd.refresh();*/
 
-        robo.calibrate();
-        robo.move(45 * 6, 7);
-        robo.espeak.setMessage("Hello");
-        robo.espeak.say();
-        robo.move(-45 * 6, 7);
-        robo.turnLeft(270);
+        robot.left.rotate(90);
+        robot.right.rotate(90);
+        robot.calibrate();
+        /*robot.move(45 * 6, 7);
+        robot.espeak.setMessage("Hello");
+        robot.espeak.say();
+        robot.move(-45 * 6, 7);
+        robot.turnLeft(270);
         Delay.msDelay(2000);
-        robo.stop();
+        robot.stop();*/
+        //for (int i = 0; i < 4; i++) {
+        //    robot.move(45 * 6, 3);
+        Delay.msDelay(2000);
+        robot.turn(50 * 6, 90);
+        //}
 
         //tanzen1(linkesBein, arme);
         //tanzen1(rechtesBein, arme);
     }
 }
 
-class Roboter {
-    RegulatedMotor links;
-    RegulatedMotor rechts;
-    EV3TouchSensor linksSensor;
-    EV3TouchSensor rechtsSensor;
+class Robot {
+    RegulatedMotor left;
+    RegulatedMotor right;
+    EV3TouchSensor leftSensor;
+    EV3TouchSensor rightSensor;
     GraphicsLCD lcd;
     Espeak espeak;
 
-    Roboter() {
-        links = new NXTRegulatedMotor(MotorPort.C);
-        rechts = new NXTRegulatedMotor(MotorPort.B);
-        linksSensor = new EV3TouchSensor(SensorPort.S2);
-        rechtsSensor = new EV3TouchSensor(SensorPort.S1);
-        lcd = LCD.getInstance();
-        espeak = new Espeak();
+    Boolean isCalibrated;
+
+    Robot() {
+        left = new NXTRegulatedMotor(MotorPort.C);
+        right = new NXTRegulatedMotor(MotorPort.B);
+        leftSensor = new EV3TouchSensor(SensorPort.S2);
+        rightSensor = new EV3TouchSensor(SensorPort.S1);
+        isCalibrated = false;
+        //lcd = LCD.getInstance();
+        //espeak = new Espeak();
     }
 
     void calibrate() {
-        links.setSpeed(270);
-        links.forward();
-        while (!linksSensor.isPressed()) Delay.msDelay(100);
-        links.stop();
-        rechts.setSpeed(270);
-        rechts.forward();
-        while (!rechtsSensor.isPressed()) Delay.msDelay(100);
-        rechts.stop();
-        links.rotate(180);
+        calibrate(true);
+    }
+
+    void calibrate(Boolean extraTurnLeft) {
+        if (!isCalibrated) {
+            left.setSpeed(270);
+            left.forward();
+            while (!leftSensor.isPressed()) Delay.msDelay(100);
+            left.stop();
+            right.setSpeed(270);
+            right.forward();
+            while (!rightSensor.isPressed()) Delay.msDelay(100);
+            right.stop();
+            if (extraTurnLeft) left.rotate(180);
+            else right.rotate(180);
+            isCalibrated = true;
+        }
     }
 
     void forward(int speed) {
-        links.setSpeed(speed);
-        rechts.setSpeed(speed);
-        links.forward();
-        rechts.forward();
+        left.setSpeed(speed);
+        right.setSpeed(speed);
+        left.forward();
+        right.forward();
     }
 
     void backward(int speed) {
-        links.setSpeed(speed);
-        rechts.setSpeed(speed);
-        links.backward();
-        rechts.backward();
+        left.setSpeed(speed);
+        right.setSpeed(speed);
+        left.backward();
+        right.backward();
     }
 
     void stop() {
-        links.stop(true);
-        rechts.stop();
+        left.stop(true);
+        right.stop();
     }
 
     void move(int speed, int steps) {
@@ -102,21 +119,28 @@ class Roboter {
     }
 
     void move(int speed, int steps, boolean immediateReturn) {
-        links.setSpeed(speed);
-        rechts.setSpeed(speed);
+        left.setSpeed(speed);
+        right.setSpeed(speed);
         if (speed > 0) {
-            links.rotate(steps * 360, true);
-            rechts.rotate(steps * 360, immediateReturn);
+            left.rotate(steps * 360, true);
+            right.rotate(steps * 360, immediateReturn);
         } else {
-            links.rotate(steps * -360, true);
-            rechts.rotate(steps * -360, immediateReturn);
+            left.rotate(steps * -360, true);
+            right.rotate(steps * -360, immediateReturn);
         }
     }
 
-    void turnLeft(int speed) {
-        links.setSpeed(speed);
-        rechts.setSpeed(speed);
-        links.forward();
-        rechts.backward();
+    void turn(int speed, int degrees) {
+        if (degrees < 0) {
+            calibrate(false);
+            right.rotate(36);
+            left.setSpeed(speed);
+            left.rotate(40 * degrees);
+        } else {
+            calibrate();
+            left.rotate(36);
+            right.setSpeed(speed);
+            right.rotate(60 * degrees);
+        }
     }
 }
