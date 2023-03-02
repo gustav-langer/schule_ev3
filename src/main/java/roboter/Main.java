@@ -1,14 +1,14 @@
 package roboter;
 
-import ev3dev.actuators.lego.motors.NXTRegulatedMotor;
+import ev3dev.actuators.Sound;
 import ev3dev.robotics.tts.Espeak;
 import ev3dev.sensors.ev3.EV3TouchSensor;
+import ev3dev.utils.JarResource;
 import lejos.hardware.lcd.GraphicsLCD;
-import lejos.hardware.port.MotorPort;
-import lejos.hardware.port.SensorPort;
 import lejos.robotics.RegulatedMotor;
 import lejos.utility.Delay;
 
+import java.io.File;
 import java.io.IOException;
 
 /*
@@ -34,9 +34,9 @@ public class Main {
         //lcd.drawImage(JarResource.loadImage(JarResource.JAVA_DUKE_IMAGE_NAME), 35, 10, 0);
         robot.lcd.refresh();*/
 
-        robot.left.rotate(90);
-        robot.right.rotate(90);
-        robot.calibrate();
+        //robot.left.rotate(90);
+        //robot.right.rotate(90);
+        //robot.calibrate();
         /*robot.move(45 * 6, 7);
         robot.espeak.setMessage("Hello");
         robot.espeak.say();
@@ -46,8 +46,9 @@ public class Main {
         robot.stop();*/
         //for (int i = 0; i < 4; i++) {
         //    robot.move(45 * 6, 3);
-        Delay.msDelay(2000);
-        robot.turn(50 * 6, 90);
+        //Delay.msDelay(2000);
+        //robot.turn(50 * 6, 90);
+        robot.sound.playSample(new File("nggyu.wav"));
         //}
 
         //tanzen1(linkesBein, arme);
@@ -62,17 +63,18 @@ class Robot {
     EV3TouchSensor rightSensor;
     GraphicsLCD lcd;
     Espeak espeak;
-
     Boolean isCalibrated;
+    Sound sound;
 
     Robot() {
-        left = new NXTRegulatedMotor(MotorPort.C);
-        right = new NXTRegulatedMotor(MotorPort.B);
-        leftSensor = new EV3TouchSensor(SensorPort.S2);
-        rightSensor = new EV3TouchSensor(SensorPort.S1);
-        isCalibrated = false;
+        //left = new NXTRegulatedMotor(MotorPort.C);
+        //right = new NXTRegulatedMotor(MotorPort.B);
+        //leftSensor = new EV3TouchSensor(SensorPort.S2);
+        //rightSensor = new EV3TouchSensor(SensorPort.S1);
         //lcd = LCD.getInstance();
         //espeak = new Espeak();
+        sound = Sound.getInstance();
+        isCalibrated = false;
     }
 
     void calibrate() {
