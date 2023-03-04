@@ -1,15 +1,20 @@
 package roboter;
 
+import ev3dev.actuators.LCD;
 import ev3dev.actuators.Sound;
+import ev3dev.actuators.lego.motors.NXTRegulatedMotor;
 import ev3dev.robotics.tts.Espeak;
 import ev3dev.sensors.ev3.EV3TouchSensor;
-import ev3dev.utils.JarResource;
+import ev3dev.utils.Sysfs;
 import lejos.hardware.lcd.GraphicsLCD;
+import lejos.hardware.port.MotorPort;
+import lejos.hardware.port.SensorPort;
 import lejos.robotics.RegulatedMotor;
 import lejos.utility.Delay;
 
 import java.io.File;
-import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 /*
 Was der Roboter können muss:
@@ -23,8 +28,13 @@ Ideen:
  */
 
 public class Main {
-    public static void main(String[] args) throws IOException {
-        Robot robot = new Robot();
+    public static void main(String[] args) {
+        Robot robot = new Robot(true);
+        if (Sysfs.readString("/sys/class/lego-port/port0/address").equals("ev3-ports:in1"))
+            Sysfs.writeString("/sys/class/lego-port/port0/set_device", "lego-nxt-touch"); //Fix sensor detection
+        if (Sysfs.readString("/sys/class/lego-port/port1/address").equals("ev3-ports:in2"))
+            Sysfs.writeString("/sys/class/lego-port/port1/set_device", "lego-nxt-touch");
+        Sysfs.writeString("", "");
         /*//lcd.setFont(lcd.getFont().deriveFont((float)lcd.getFont().getSize()*10));
         robot.lcd.setColor(255, 255, 255);
         robot.lcd.drawRect(0, 0, robot.lcd.getWidth(), robot.lcd.getHeight());
@@ -47,7 +57,7 @@ public class Main {
         //for (int i = 0; i < 4; i++) {
         //    robot.move(45 * 6, 3);
         //Delay.msDelay(2000);
-        //robot.turn(50 * 6, 90);
+        robot.turn(50 * 6, -90);
         robot.sound.playSample(new File("nggyu.wav"));
         //}
 
@@ -66,15 +76,48 @@ class Robot {
     Boolean isCalibrated;
     Sound sound;
 
-    Robot() {
-        //left = new NXTRegulatedMotor(MotorPort.C);
-        //right = new NXTRegulatedMotor(MotorPort.B);
-        //leftSensor = new EV3TouchSensor(SensorPort.S2);
-        //rightSensor = new EV3TouchSensor(SensorPort.S1);
-        //lcd = LCD.getInstance();
-        //espeak = new Espeak();
-        sound = Sound.getInstance();
+    Robot(boolean doImmediateCalibration) {
+        try {
+            initAsync(doImmediateCalibration);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        //init(doImmediateCalibration);
+    }
+
+    void initAsync(boolean doImmediateCalibration) throws ExecutionException, InterruptedException {
         isCalibrated = false;
+        CompletableFuture<RegulatedMotor> leftFuture = CompletableFuture.supplyAsync(() -> new NXTRegulatedMotor(MotorPort.C));
+        CompletableFuture<RegulatedMotor> rightFuture = CompletableFuture.supplyAsync(() -> new NXTRegulatedMotor(MotorPort.B));
+        CompletableFuture<EV3TouchSensor> leftSensorFuture = CompletableFuture.supplyAsync(() -> new EV3TouchSensor(SensorPort.S2));
+        CompletableFuture<EV3TouchSensor> rightSensorFuture = CompletableFuture.supplyAsync(() -> new EV3TouchSensor(SensorPort.S1));
+        CompletableFuture<GraphicsLCD> lcdFuture = CompletableFuture.supplyAsync(LCD::getInstance);
+        CompletableFuture<Espeak> espeakFuture = CompletableFuture.supplyAsync(Espeak::new);
+        CompletableFuture<Sound> soundFuture = CompletableFuture.supplyAsync(Sound::getInstance);
+        left = leftFuture.get();
+        right = rightFuture.get();
+        leftSensor = leftSensorFuture.get();
+        rightSensor = rightSensorFuture.get();
+        if (doImmediateCalibration) {
+            CompletableFuture.runAsync(this::calibrate).thenRun(() -> isCalibrated = true);
+        } else isCalibrated = false;
+        lcd = lcdFuture.get();
+        espeak = espeakFuture.get();
+        sound = soundFuture.get();
+    }
+
+    void init(boolean doImmediateCalibration) {
+        left = new NXTRegulatedMotor(MotorPort.C);
+        right = new NXTRegulatedMotor(MotorPort.B);
+        leftSensor = new EV3TouchSensor(SensorPort.S2);
+        rightSensor = new EV3TouchSensor(SensorPort.S1);
+        lcd = LCD.getInstance();
+        espeak = new Espeak();
+        sound = Sound.getInstance();
+        if (doImmediateCalibration) {
+            calibrate();
+            isCalibrated = true;
+        } else isCalibrated = false;
     }
 
     void calibrate() {
