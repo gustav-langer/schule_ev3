@@ -29,11 +29,11 @@ Ideen:
 
 public class Main {
     public static void main(String[] args) {
-        Robot robot = new Robot(true);
         if (Sysfs.readString("/sys/class/lego-port/port0/address").equals("ev3-ports:in1"))
             Sysfs.writeString("/sys/class/lego-port/port0/set_device", "lego-nxt-touch"); //Fix sensor detection
         if (Sysfs.readString("/sys/class/lego-port/port1/address").equals("ev3-ports:in2"))
             Sysfs.writeString("/sys/class/lego-port/port1/set_device", "lego-nxt-touch");
+        Robot robot = new Robot(true);
         /*//lcd.setFont(lcd.getFont().deriveFont((float)lcd.getFont().getSize()*10));
         robot.lcd.setColor(255, 255, 255);
         robot.lcd.drawRect(0, 0, robot.lcd.getWidth(), robot.lcd.getHeight());
@@ -120,10 +120,6 @@ class Robot {
     }
 
     void calibrate() {
-        calibrate(true);
-    }
-
-    void calibrate(Boolean extraTurnLeft) {
         if (!isCalibrated) {
             left.setSpeed(270);
             left.forward();
@@ -133,8 +129,7 @@ class Robot {
             right.forward();
             while (!rightSensor.isPressed()) Delay.msDelay(100);
             right.stop();
-            if (extraTurnLeft) left.rotate(180);
-            else right.rotate(180);
+            left.rotate(180);
             isCalibrated = true;
         }
     }
@@ -144,6 +139,7 @@ class Robot {
         right.setSpeed(speed);
         left.forward();
         right.forward();
+        isCalibrated = false;
     }
 
     void backward(int speed) {
@@ -151,6 +147,7 @@ class Robot {
         right.setSpeed(speed);
         left.backward();
         right.backward();
+        isCalibrated = false;
     }
 
     void stop() {
@@ -176,8 +173,9 @@ class Robot {
 
     void turn(int speed, int degrees) {
         if (degrees < 0) {
-            calibrate(false);
-            right.rotate(36);
+            calibrate();
+            left.rotate(180);
+            right.rotate(36 + 180);
             left.setSpeed(speed);
             left.rotate(40 * degrees);
         } else {
@@ -186,5 +184,6 @@ class Robot {
             right.setSpeed(speed);
             right.rotate(60 * degrees);
         }
+        isCalibrated = false;
     }
 }
