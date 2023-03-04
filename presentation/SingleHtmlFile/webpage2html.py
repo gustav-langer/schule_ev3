@@ -210,7 +210,7 @@ def handle_css_content(index, css, verbose=True):
 def generate(index, verbose=True, comment=True, keep_script=False, prettify=False, full_url=True, verify=True,
              errorpage=False, username=None, password=None, **kwargs):
     """
-    given a index url such as http://www.google.com, http://custom.domain/index.html
+    given an index url such as http://www.google.com, http://custom.domain/index.html
     return generated single html
     """
     html_doc, extra_data = get(index, verbose=verbose, verify=verify, ignore_error=errorpage,

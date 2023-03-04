@@ -14,12 +14,10 @@ public class MyFirstRobot {
         final EV3LargeRegulatedMotor motorRight = new EV3LargeRegulatedMotor(MotorPort.B);
 
         //To Stop the motor in case of pkill java for example
-        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-            public void run() {
-                System.out.println("Emergency Stop");
-                motorLeft.stop();
-                motorRight.stop();
-            }
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("Emergency Stop");
+            motorLeft.stop();
+            motorRight.stop();
         }));
 
         System.out.println("Defining the Stop mode");

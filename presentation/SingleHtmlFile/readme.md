@@ -23,7 +23,7 @@ or save web page first using browsers such as Chrome, to something.html with som
 $ python webpage2html.py /path/to/something.html > something_single.html
 ```
 
-But note that the second method may not always work as expected, because there may be urls like `//ssl.gstatic.com/gb/images/v1_c69d5271.png` (from google index page), but the file is missing in `Google_files` directory saved by browsers.
+But note that the second method may not always work as expected, because there may be urls like `//ssl.gstatic.com/gb/images/v1_c69d5271.png` (from Google index page), but the file is missing in `Google_files` directory saved by browsers.
 
 Enable javascript, for example, save 2048 game page into a single html for offline playing
 
@@ -45,7 +45,7 @@ or install them manually
 $ pip install lxml BeautifulSoup4 requests termcolor
 ```
 
-I have tried the default `HTMLParser` and `html5lib` as the backend parser for BeautifulSoup, but both of them are buggy, `HTMLParser` handles self closing tags (like `<br>` `<meta>`) incorrectly(it will wait for closing tag for `<br>`, so If too many `<br>` tags exist in the html, BeautifulSoup will complain `RuntimeError: maximum recursion depth exceeded`), and `html5lib` will encode encoded html entities such as `&lt;` again to `&amp;lt;`, which is definitly unacceptable. I have tested many cases, and `lxml` works perfectly, so I choose to use `lxml` now.
+I have tried the default `HTMLParser` and `html5lib` as the backend parser for BeautifulSoup, but both of them are buggy, `HTMLParser` handles self-closing tags (like `<br>` `<meta>`) incorrectly(it will wait for closing tag for `<br>`, so If too many `<br>` tags exist in the html, BeautifulSoup will complain `RuntimeError: maximum recursion depth exceeded`), and `html5lib` will encode encoded html entities such as `&lt;` again to `&amp;lt;`, which is definitly unacceptable. I have tested many cases, and `lxml` works perfectly, so I choose to use `lxml` now.
 
 The `termcolor` package is for colored log output support if you like.
 
@@ -65,14 +65,14 @@ The page embeds less css directly and use less.js to compile in browser. In this
 
 ### srcset attribute in img tag (html5)
 
-Currently srcset is discarded.
+Currently, srcset is discarded.
 
 # Contributors
 
  1. lukin.a.i submitted a patch to fix not recognised css link (rel=stylesheet) issue
- 1. [Gruber](https://github.com/GlassGruber).
- 1. Java port of this project. https://github.com/cedricblondeau/webpage2html-java
- 1. [https://github.com/presto8](https://github.com/presto8)
+ 2. [Gruber](https://github.com/GlassGruber).
+ 3. Java port of this project. https://github.com/cedricblondeau/webpage2html-java
+ 4. [https://github.com/presto8](https://github.com/presto8)
 
 # License
 
