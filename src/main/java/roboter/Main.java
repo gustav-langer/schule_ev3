@@ -34,7 +34,6 @@ public class Main {
             Sysfs.writeString("/sys/class/lego-port/port0/set_device", "lego-nxt-touch"); //Fix sensor detection
         if (Sysfs.readString("/sys/class/lego-port/port1/address").equals("ev3-ports:in2"))
             Sysfs.writeString("/sys/class/lego-port/port1/set_device", "lego-nxt-touch");
-        Sysfs.writeString("", "");
         /*//lcd.setFont(lcd.getFont().deriveFont((float)lcd.getFont().getSize()*10));
         robot.lcd.setColor(255, 255, 255);
         robot.lcd.drawRect(0, 0, robot.lcd.getWidth(), robot.lcd.getHeight());
