@@ -99,7 +99,8 @@ task deploy {
                 put from: "${projectDir}/build/libs/" + "${rootProject.name}" + "-" + version + ".jar", into: "/home/robot/"
                 execute "echo java -jar /home/robot/" + "${rootProject.name}" + "-" + version + ".jar > /home/robot/run_" + "${rootProject.name}" + "-" + version + ".sh"
                 execute "chmod +x /home/robot/run_" + "${rootProject.name}" + "-" + version + ".sh"
-                put from: "${projectDir}/src/main/java/roboter/nggyu.wav", into: "/home/robot/"
+                // put from: "${projectDir}/src/main/java/roboter/nggyu.wav", into: "/home/robot/"
+                // put from: "${projectDir}/src/main/java/roboter/song.wav", into: "/home/robot/"
             }
         }
     }

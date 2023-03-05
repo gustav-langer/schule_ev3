@@ -5,6 +5,7 @@ import ev3dev.actuators.Sound;
 import ev3dev.actuators.lego.motors.NXTRegulatedMotor;
 import ev3dev.robotics.tts.Espeak;
 import ev3dev.sensors.ev3.EV3TouchSensor;
+import ev3dev.utils.JarResource;
 import ev3dev.utils.Sysfs;
 import lejos.hardware.lcd.GraphicsLCD;
 import lejos.hardware.port.MotorPort;
@@ -13,6 +14,7 @@ import lejos.robotics.RegulatedMotor;
 import lejos.utility.Delay;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -29,39 +31,19 @@ Ideen:
 
 public class Main {
     public static void main(String[] args) {
-        if (Sysfs.readString("/sys/class/lego-port/port0/address").equals("ev3-ports:in1"))
-            Sysfs.writeString("/sys/class/lego-port/port0/set_device", "lego-nxt-touch"); //Fix sensor detection
-        if (Sysfs.readString("/sys/class/lego-port/port1/address").equals("ev3-ports:in2"))
-            Sysfs.writeString("/sys/class/lego-port/port1/set_device", "lego-nxt-touch");
         Robot robot = new Robot(true);
-        /*//lcd.setFont(lcd.getFont().deriveFont((float)lcd.getFont().getSize()*10));
-        robot.lcd.setColor(255, 255, 255);
-        robot.lcd.drawRect(0, 0, robot.lcd.getWidth(), robot.lcd.getHeight());
-        robot.lcd.setColor(0);
-        robot.lcd.drawString("Please wait...", 35, 10, 0);
-        robot.lcd.getFont();
-        //lcd.drawImage(JarResource.loadImage(JarResource.JAVA_DUKE_IMAGE_NAME), 35, 10, 0);
-        robot.lcd.refresh();*/
-
-        //robot.left.rotate(90);
-        //robot.right.rotate(90);
-        //robot.calibrate();
-        /*robot.move(45 * 6, 7);
+        try {
+            robot.lcd.drawImage(JarResource.loadImage(JarResource.JAVA_DUKE_IMAGE_NAME), 35, 10, 0);
+            robot.lcd.refresh();
+        } catch (IOException e) {
+            //couldn't load image
+        }
+        robot.move(45 * 6, 7);
         robot.espeak.setMessage("Hello");
         robot.espeak.say();
         robot.move(-45 * 6, 7);
-        robot.turnLeft(270);
-        Delay.msDelay(2000);
-        robot.stop();*/
-        //for (int i = 0; i < 4; i++) {
-        //    robot.move(45 * 6, 3);
-        //Delay.msDelay(2000);
         robot.turn(50 * 6, -90);
         robot.sound.playSample(new File("nggyu.wav"));
-        //}
-
-        //tanzen1(linkesBein, arme);
-        //tanzen1(rechtesBein, arme);
     }
 }
 
@@ -76,15 +58,28 @@ class Robot {
     Sound sound;
 
     Robot(boolean doImmediateCalibration) {
-        try {
-            initAsync(doImmediateCalibration);
-        } catch (Exception e) {
-            e.printStackTrace();
+        fixSensors();
+        if (false) { //true für asynchron, false für synchron
+            try {
+                initAsync(doImmediateCalibration);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            init(doImmediateCalibration);
+            isCalibrated = false;
+            calibrate();
         }
-        //init(doImmediateCalibration);
     }
 
-    void initAsync(boolean doImmediateCalibration) throws ExecutionException, InterruptedException {
+    private void fixSensors() {
+        if (Sysfs.readString("/sys/class/lego-port/port0/address").equals("ev3-ports:in1"))
+            Sysfs.writeString("/sys/class/lego-port/port0/set_device", "lego-nxt-touch"); //Fix sensor detection
+        if (Sysfs.readString("/sys/class/lego-port/port1/address").equals("ev3-ports:in2"))
+            Sysfs.writeString("/sys/class/lego-port/port1/set_device", "lego-nxt-touch");
+    }
+
+    private void initAsync(boolean doImmediateCalibration) throws ExecutionException, InterruptedException {
         isCalibrated = false;
         CompletableFuture<RegulatedMotor> leftFuture = CompletableFuture.supplyAsync(() -> new NXTRegulatedMotor(MotorPort.C));
         CompletableFuture<RegulatedMotor> rightFuture = CompletableFuture.supplyAsync(() -> new NXTRegulatedMotor(MotorPort.B));
@@ -99,13 +94,14 @@ class Robot {
         rightSensor = rightSensorFuture.get();
         if (doImmediateCalibration) {
             CompletableFuture.runAsync(this::calibrate).thenRun(() -> isCalibrated = true);
-        } else isCalibrated = false;
+        }
         lcd = lcdFuture.get();
         espeak = espeakFuture.get();
         sound = soundFuture.get();
     }
 
-    void init(boolean doImmediateCalibration) {
+    private void init(boolean doImmediateCalibration) {
+        isCalibrated = false;
         left = new NXTRegulatedMotor(MotorPort.C);
         right = new NXTRegulatedMotor(MotorPort.B);
         leftSensor = new EV3TouchSensor(SensorPort.S2);
@@ -116,7 +112,7 @@ class Robot {
         if (doImmediateCalibration) {
             calibrate();
             isCalibrated = true;
-        } else isCalibrated = false;
+        }
     }
 
     void calibrate() {
@@ -177,7 +173,7 @@ class Robot {
             left.rotate(180);
             right.rotate(36 + 180);
             left.setSpeed(speed);
-            left.rotate(40 * degrees);
+            left.rotate(60 * degrees);
         } else {
             calibrate();
             left.rotate(36);
@@ -187,10 +183,9 @@ class Robot {
         isCalibrated = false;
     }
 }
-/*public class Gustav{
-    public static void Benjamin(String[] args) {
-        System.out.println("Ben Boerl");
-    }
-}*/
 
-// Keep 'Em Coming - Jules Gaia
+/*
+ Keep 'Em Coming - Jules Gaia
+ https://youtu.be/3bd1pJEZjvE
+ BPM ~ 137,6
+*/
