@@ -227,14 +227,14 @@ def generate(index, verbose=True, comment=True, keep_script=False, prettify=Fals
         if link.get('href'):
             if 'mask-icon' in (link.get('rel') or []) or 'icon' in (link.get('rel') or []) or 'apple-touch-icon' in (
                     link.get('rel') or []) or 'apple-touch-icon-precomposed' in (link.get('rel') or []):
-                link['data-href'] = link['href']
+                link['orig-href'] = link['href']
 
                 link['href'] = data_to_base64(index, link['href'], verbose=verbose)
             elif link.get('type') == 'text/css' or link['href'].lower().endswith('.css') or 'stylesheet' in (
                     link.get('rel') or []):
                 new_type = 'text/css' if not link.get('type') else link['type']
                 css = soup.new_tag('style', type=new_type)
-                css['data-href'] = link['href']
+                css['orig-href'] = link['href']
                 for attr in link.attrs:
                     if attr in ['href']:
                         continue
@@ -243,7 +243,7 @@ def generate(index, verbose=True, comment=True, keep_script=False, prettify=Fals
                 new_css_content = handle_css_content(absurl(index, link['href']), css_data, verbose=verbose)
                 # if "stylesheet/less" in '\n'.join(link.get('rel') or []).lower():    # fix browser side less: http://lesscss.org/#client-side-usage
                 #     # link['href'] = 'data:text/less;base64,' + base64.b64encode(css_data)
-                #     link['data-href'] = link['href']
+                #     link['orig-href'] = link['href']
                 #     link['href'] = absurl(index, link['href'])
                 if False:  # new_css_content.find('@font-face') > -1 or new_css_content.find('@FONT-FACE') > -1:
                     link['href'] = 'data:text/css;base64,' + base64.b64encode(new_css_content)
@@ -251,7 +251,7 @@ def generate(index, verbose=True, comment=True, keep_script=False, prettify=Fals
                     css.string = new_css_content
                     link.replace_with(css)
             elif full_url:
-                link['data-href'] = link['href']
+                link['orig-href'] = link['href']
                 link['href'] = absurl(index, link['href'])
     for js in soup('script'):
         if not keep_script:
@@ -261,7 +261,7 @@ def generate(index, verbose=True, comment=True, keep_script=False, prettify=Fals
             continue
         new_type = 'text/javascript' if not js.has_attr('type') or not js['type'] else js['type']
         code = soup.new_tag('script', type=new_type)
-        code['data-src'] = js['src']
+        code['orig-src'] = js['src']
         js_str, _ = get(index, relpath=js['src'], verbose=verbose)
         if type(js_str) == bytes:
             js_str = js_str.decode('utf-8')
@@ -283,7 +283,7 @@ def generate(index, verbose=True, comment=True, keep_script=False, prettify=Fals
     for img in soup('img'):
         if not img.get('src'):
             continue
-        img['data-src'] = img['src']
+        img['orig-src'] = img['src']
         img['src'] = data_to_base64(index, img['src'], verbose=verbose)
 
         # `img` elements may have `srcset` attributes with multiple sets of images.
@@ -293,10 +293,10 @@ def generate(index, verbose=True, comment=True, keep_script=False, prettify=Fals
         # that are stripped.
 
         if img.get('srcset'):
-            img['data-srcset'] = img['srcset']
+            img['orig-srcset'] = img['srcset']
             del img['srcset']
             if verbose:
-                log('[ WARN ] srcset found in img tag. Attribute will be cleared. File src => %s' % (img['data-src']),
+                log('[ WARN ] srcset found in img tag. Attribute will be cleared. File src => %s' % (img['orig-src']),
                     'yellow')
 
         def check_alt(attr):
@@ -308,9 +308,16 @@ def generate(index, verbose=True, comment=True, keep_script=False, prettify=Fals
         check_alt('onerror')
         check_alt('onmouseover')
         check_alt('onmouseout')
+
+    for img in soup('img'):
+        if not img.get('data-src'):
+            continue
+        img['orig-data-src'] = img['data-src']
+        img['data-src'] = data_to_base64(index, img['data-src'], verbose=verbose)
+
     for tag in soup(True):
         if full_url and tag.name == 'a' and tag.has_attr('href') and not tag['href'].startswith('#'):
-            tag['data-href'] = tag['href']
+            tag['orig-href'] = tag['href']
             tag['href'] = absurl(index, tag['href'])
         if tag.has_attr('style'):
             if tag['style']:
