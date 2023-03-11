@@ -3,7 +3,7 @@ Please keep the [issue tracker](https://github.com/hakimel/reveal.js/issues) lim
 
 
 ### General Questions and Support
-If you have questions about how to use reveal.js the best place to ask is in the [Discussions](https://github.com/hakimel/reveal.js/discussions). Anything that isn't a bug report should be posted as a dicussion instead.
+If you have questions about how to use reveal.js the best place to ask is in the [Discussions](https://github.com/hakimel/reveal.js/discussions). Anything that isn't a bug report should be posted as a discussion instead.
 
 
 ### Bug Reports

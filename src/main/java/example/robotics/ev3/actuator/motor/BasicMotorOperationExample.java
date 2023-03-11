@@ -10,7 +10,7 @@ class BasicMotorOperationExample {
 
     public static Logger LOGGER = LoggerFactory.getLogger(BasicMotorOperationExample.class);
 
-    public static int DELAY = 2000; //2 Sedonds
+    public static int DELAY = 2000; //2 Seconds
 
     public static final EV3LargeRegulatedMotor mA = new EV3LargeRegulatedMotor(MotorPort.A);
 
