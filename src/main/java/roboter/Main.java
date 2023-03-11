@@ -1,11 +1,11 @@
 package roboter;
 
 import ev3dev.actuators.LCD;
-import ev3dev.actuators.Sound;
 import ev3dev.actuators.lego.motors.NXTRegulatedMotor;
 import ev3dev.robotics.tts.Espeak;
 import ev3dev.sensors.ev3.EV3TouchSensor;
 import ev3dev.utils.JarResource;
+import ev3dev.utils.Shell;
 import ev3dev.utils.Sysfs;
 import lejos.hardware.lcd.GraphicsLCD;
 import lejos.hardware.port.MotorPort;
@@ -16,11 +16,11 @@ import lejos.utility.Delay;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /*
 Was der Roboter können muss:
@@ -38,37 +38,39 @@ public class Main {
     private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) {
-        Speed speed = Speed.ev3(45);
         Robot robot = new Robot(true);
         LOGGER.info("Roboter erzeugt!");
         try {
-            robot.lcd.drawImage(JarResource.loadImage(JarResource.JAVA_DUKE_IMAGE_NAME), 35, 10, 0);
-            robot.lcd.refresh();
+            robot.getLcd().drawImage(JarResource.loadImage(JarResource.JAVA_DUKE_IMAGE_NAME), 35, 10, 0);
+            robot.getLcd().refresh();
         } catch (IOException e) {
-            //couldn't load image
+            LOGGER.info("Couldn't load image");
         }
         robot.move(Speed.ev3(45), 7);
-        robot.espeak.setMessage("Hello");
-        robot.espeak.say();
+        robot.say("Hello");
         robot.move(Speed.ev3(-45), 7);
         robot.turn(Speed.ev3(50), -90);
-        robot.sound.playSample(new File("song.wav"));
+        CompletableFuture<Void> songFuture = robot.startPlayingFile("song.wav");
+        try {
+            songFuture.get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
 
 class Robot {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Robot.class);
-    RegulatedMotor rightMotor;
-    Touch leftSensor;
-    Touch rightSensor;
-    GraphicsLCD lcd;
-    Espeak espeak = new Espeak();
-    Sound sound;
-    boolean isInitiallyCalibrated = false;
-    int leftCalibratedAngle;
-    int rightCalibratedAngle;
+    private final Espeak espeak = new Espeak();
+    private GraphicsLCD lcd;
+    private RegulatedMotor rightMotor;
     private RegulatedMotor leftMotor;
+    private Touch leftSensor;
+    private Touch rightSensor;
+    private boolean isInitiallyCalibrated = false;
+    private int leftCalibratedAngle;
+    private int rightCalibratedAngle;
 
     Robot(boolean doImmediateCalibration) {
         Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
@@ -78,7 +80,7 @@ class Robot {
             } catch (Exception e) {
                 e.printStackTrace();
                 System.err.flush();
-                System.exit(-2);
+                throw new RuntimeException();
             }
         } else {
             init(doImmediateCalibration);
@@ -86,13 +88,12 @@ class Robot {
     }
 
     private void initAsync(boolean doImmediateCalibration) throws ExecutionException, InterruptedException {
-        List<File> motoren = Sysfs.getElements("/sys/class/tacho-motor");
-        LOGGER.info(motoren.toString());
-        for (File motor : motoren) {
+        /*List<File> motoren = Sysfs.getElements("/sys/class/tacho-motor");
+        //LOGGER.info(motoren.toString());
+        //for (File motor : motoren) {
             LOGGER.info(Sysfs.getElements(motor.getPath()).toString());
-        }
-        CompletableFuture<RegulatedMotor> leftFuture = CompletableFuture.<RegulatedMotor>supplyAsync(
-                        () -> new NXTRegulatedMotor(MotorPort.C))
+        }*/
+        CompletableFuture<RegulatedMotor> leftFuture = CompletableFuture.<RegulatedMotor>supplyAsync(() -> new NXTRegulatedMotor(MotorPort.C))
                 .exceptionally((e) -> {
                     LOGGER.info("Motor C not found");
                     // Immer wieder versuchen, den Motor zu finden, da der Roboter manchmal beim ersten oder zweiten Aufruf zu langsam ist.
@@ -104,8 +105,7 @@ class Robot {
                         }
                     }
                 });
-        CompletableFuture<RegulatedMotor> rightFuture = CompletableFuture.<RegulatedMotor>supplyAsync(
-                        () -> new NXTRegulatedMotor(MotorPort.B))
+        CompletableFuture<RegulatedMotor> rightFuture = CompletableFuture.<RegulatedMotor>supplyAsync(() -> new NXTRegulatedMotor(MotorPort.B))
                 .exceptionally((e) -> {
                     LOGGER.info("Motor B not found");
                     while (true) {
@@ -130,17 +130,21 @@ class Robot {
                     return new EV3TouchSensor(SensorPort.S1);
                 });
         CompletableFuture<GraphicsLCD> lcdFuture = CompletableFuture.supplyAsync(LCD::getInstance);
-        CompletableFuture<Sound> soundFuture = CompletableFuture.supplyAsync(Sound::getInstance);
 
-        leftMotor = leftFuture.get();
-        rightMotor = rightFuture.get();
+        try {
+            leftMotor = leftFuture.get(1, TimeUnit.MINUTES);
+            rightMotor = rightFuture.get(1, TimeUnit.MINUTES);
+        } catch (TimeoutException e) {
+            LOGGER.error("Motors timed out");
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
         leftSensor = leftSensorFuture.get();
         rightSensor = rightSensorFuture.get();
         CompletableFuture<Void> calibrateFuture = CompletableFuture.runAsync(() -> {
             if (doImmediateCalibration) calibrate(true);
         });
         lcd = lcdFuture.get();
-        sound = soundFuture.get();
         calibrateFuture.get(); // Warten, bis das Kalibrieren abgeschlossen ist
     }
 
@@ -157,7 +161,6 @@ class Robot {
             rightSensor = new EV3TouchSensor(SensorPort.S1);
         }
         lcd = LCD.getInstance();
-        sound = Sound.getInstance();
         if (doImmediateCalibration) {
             calibrate(true);
         }
@@ -240,6 +243,25 @@ class Robot {
             rightMotor.rotate(rotationFactor * degrees);
         }
     }
+
+    GraphicsLCD getLcd() {
+        return lcd;
+    }
+
+    void say(String message) {
+        espeak.setMessage(message);
+        espeak.say();
+    }
+
+    CompletableFuture<Void> startPlayingFile(String path) {
+        return CompletableFuture.runAsync(() -> Shell.execute("aplay < " + path));
+    }
+
+    void playFile(String path) {
+        Shell.execute("aplay < " + path);
+    }
+
+
 }
 
 class Speed {

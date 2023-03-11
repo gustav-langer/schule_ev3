@@ -14,4 +14,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'template_project_gradle'
+rootProject.name = 'schule_ev3'
