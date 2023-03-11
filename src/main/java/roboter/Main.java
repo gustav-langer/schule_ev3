@@ -11,10 +11,14 @@ import lejos.hardware.lcd.GraphicsLCD;
 import lejos.hardware.port.MotorPort;
 import lejos.hardware.port.SensorPort;
 import lejos.robotics.RegulatedMotor;
+import lejos.robotics.Touch;
 import lejos.utility.Delay;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -30,157 +34,241 @@ Ideen:
  */
 
 public class Main {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
+
     public static void main(String[] args) {
+        Speed speed = Speed.ev3(45);
         Robot robot = new Robot(true);
+        LOGGER.info("Roboter erzeugt!");
         try {
             robot.lcd.drawImage(JarResource.loadImage(JarResource.JAVA_DUKE_IMAGE_NAME), 35, 10, 0);
             robot.lcd.refresh();
         } catch (IOException e) {
             //couldn't load image
         }
-        robot.move(45 * 6, 7);
+        robot.move(Speed.ev3(45), 7);
         robot.espeak.setMessage("Hello");
         robot.espeak.say();
-        robot.move(-45 * 6, 7);
-        robot.turn(50 * 6, -90);
-        robot.sound.playSample(new File("nggyu.wav"));
+        robot.move(Speed.ev3(-45), 7);
+        robot.turn(Speed.ev3(50), -90);
+        robot.sound.playSample(new File("song.wav"));
     }
 }
 
 class Robot {
-    RegulatedMotor left;
-    RegulatedMotor right;
-    EV3TouchSensor leftSensor;
-    EV3TouchSensor rightSensor;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Robot.class);
+    RegulatedMotor rightMotor;
+    Touch leftSensor;
+    Touch rightSensor;
     GraphicsLCD lcd;
-    Espeak espeak;
-    Boolean isCalibrated;
+    Espeak espeak = new Espeak();
     Sound sound;
+    boolean isInitiallyCalibrated = false;
+    int leftCalibratedAngle;
+    int rightCalibratedAngle;
+    private RegulatedMotor leftMotor;
 
     Robot(boolean doImmediateCalibration) {
-        fixSensors();
-        if (false) { //true für asynchron, false für synchron
+        Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
+        if (true) { //true für asynchron, false für synchron
             try {
                 initAsync(doImmediateCalibration);
             } catch (Exception e) {
                 e.printStackTrace();
+                System.err.flush();
+                System.exit(-2);
             }
         } else {
             init(doImmediateCalibration);
-            isCalibrated = false;
-            calibrate();
         }
-    }
-
-    private void fixSensors() {
-        if (Sysfs.readString("/sys/class/lego-port/port0/address").equals("ev3-ports:in1"))
-            Sysfs.writeString("/sys/class/lego-port/port0/set_device", "lego-nxt-touch"); //Fix sensor detection
-        if (Sysfs.readString("/sys/class/lego-port/port1/address").equals("ev3-ports:in2"))
-            Sysfs.writeString("/sys/class/lego-port/port1/set_device", "lego-nxt-touch");
     }
 
     private void initAsync(boolean doImmediateCalibration) throws ExecutionException, InterruptedException {
-        isCalibrated = false;
-        CompletableFuture<RegulatedMotor> leftFuture = CompletableFuture.supplyAsync(() -> new NXTRegulatedMotor(MotorPort.C));
-        CompletableFuture<RegulatedMotor> rightFuture = CompletableFuture.supplyAsync(() -> new NXTRegulatedMotor(MotorPort.B));
-        CompletableFuture<EV3TouchSensor> leftSensorFuture = CompletableFuture.supplyAsync(() -> new EV3TouchSensor(SensorPort.S2));
-        CompletableFuture<EV3TouchSensor> rightSensorFuture = CompletableFuture.supplyAsync(() -> new EV3TouchSensor(SensorPort.S1));
+        List<File> motoren = Sysfs.getElements("/sys/class/tacho-motor");
+        LOGGER.info(motoren.toString());
+        for (File motor : motoren) {
+            LOGGER.info(Sysfs.getElements(motor.getPath()).toString());
+        }
+        CompletableFuture<RegulatedMotor> leftFuture = CompletableFuture.<RegulatedMotor>supplyAsync(
+                        () -> new NXTRegulatedMotor(MotorPort.C))
+                .exceptionally((e) -> {
+                    LOGGER.info("Motor C not found");
+                    // Immer wieder versuchen, den Motor zu finden, da der Roboter manchmal beim ersten oder zweiten Aufruf zu langsam ist.
+                    while (true) {
+                        try {
+                            return new NXTRegulatedMotor(MotorPort.C);
+                        } catch (RuntimeException f) {
+                            LOGGER.info("Motor C not found");
+                        }
+                    }
+                });
+        CompletableFuture<RegulatedMotor> rightFuture = CompletableFuture.<RegulatedMotor>supplyAsync(
+                        () -> new NXTRegulatedMotor(MotorPort.B))
+                .exceptionally((e) -> {
+                    LOGGER.info("Motor B not found");
+                    while (true) {
+                        try {
+                            return new NXTRegulatedMotor(MotorPort.B);
+                        } catch (RuntimeException f) {
+                            LOGGER.info("Motor B not found");
+                        }
+                    }
+                });
+        CompletableFuture<Touch> leftSensorFuture = CompletableFuture.<Touch>supplyAsync(() -> new EV3TouchSensor(SensorPort.S2))
+                .exceptionally((e) -> {
+                    LOGGER.info("Sensor S2 not found");
+                    // Wenn das passiert, wurde der Sensor nicht erkannt. Mit Sysfs.writeString kann man den Sensormodus manuell setzen
+                    Sysfs.writeString("/sys/class/lego-port/port1/set_device", "lego-nxt-touch");
+                    return new EV3TouchSensor(SensorPort.S2);
+                });
+        CompletableFuture<Touch> rightSensorFuture = CompletableFuture.<Touch>supplyAsync(() -> new EV3TouchSensor(SensorPort.S1))
+                .exceptionally((e) -> {
+                    LOGGER.info("Sensor S1 not found");
+                    Sysfs.writeString("/sys/class/lego-port/port0/set_device", "lego-nxt-touch");
+                    return new EV3TouchSensor(SensorPort.S1);
+                });
         CompletableFuture<GraphicsLCD> lcdFuture = CompletableFuture.supplyAsync(LCD::getInstance);
-        CompletableFuture<Espeak> espeakFuture = CompletableFuture.supplyAsync(Espeak::new);
         CompletableFuture<Sound> soundFuture = CompletableFuture.supplyAsync(Sound::getInstance);
-        left = leftFuture.get();
-        right = rightFuture.get();
+
+        leftMotor = leftFuture.get();
+        rightMotor = rightFuture.get();
         leftSensor = leftSensorFuture.get();
         rightSensor = rightSensorFuture.get();
-        if (doImmediateCalibration) {
-            CompletableFuture.runAsync(this::calibrate).thenRun(() -> isCalibrated = true);
-        }
+        CompletableFuture<Void> calibrateFuture = CompletableFuture.runAsync(() -> {
+            if (doImmediateCalibration) calibrate(true);
+        });
         lcd = lcdFuture.get();
-        espeak = espeakFuture.get();
         sound = soundFuture.get();
+        calibrateFuture.get(); // Warten, bis das Kalibrieren abgeschlossen ist
     }
 
     private void init(boolean doImmediateCalibration) {
-        isCalibrated = false;
-        left = new NXTRegulatedMotor(MotorPort.C);
-        right = new NXTRegulatedMotor(MotorPort.B);
-        leftSensor = new EV3TouchSensor(SensorPort.S2);
-        rightSensor = new EV3TouchSensor(SensorPort.S1);
+        leftMotor = new NXTRegulatedMotor(MotorPort.C);
+        rightMotor = new NXTRegulatedMotor(MotorPort.B);
+        try {
+            leftSensor = new EV3TouchSensor(SensorPort.S2);
+            rightSensor = new EV3TouchSensor(SensorPort.S1);
+        } catch (RuntimeException e) {
+            Sysfs.writeString("/sys/class/lego-port/port0/set_device", "lego-nxt-touch");
+            Sysfs.writeString("/sys/class/lego-port/port1/set_device", "lego-nxt-touch");
+            leftSensor = new EV3TouchSensor(SensorPort.S2);
+            rightSensor = new EV3TouchSensor(SensorPort.S1);
+        }
         lcd = LCD.getInstance();
-        espeak = new Espeak();
         sound = Sound.getInstance();
         if (doImmediateCalibration) {
-            calibrate();
-            isCalibrated = true;
+            calibrate(true);
         }
     }
 
     void calibrate() {
-        if (!isCalibrated) {
-            left.setSpeed(270);
-            left.forward();
-            while (!leftSensor.isPressed()) Delay.msDelay(100);
-            left.stop();
-            right.setSpeed(270);
-            right.forward();
-            while (!rightSensor.isPressed()) Delay.msDelay(100);
-            right.stop();
-            left.rotate(180);
-            isCalibrated = true;
+        calibrate(false);
+    }
+
+    void calibrate(boolean forceCalibrate) {
+        if (forceCalibrate || !isInitiallyCalibrated
+                || (leftCalibratedAngle != leftMotor.getTachoCount() % 360)
+                || (rightCalibratedAngle != rightMotor.getTachoCount() % 360)) {
+            leftMotor.setSpeed(270);
+            if (leftSensor.isPressed()) leftMotor.rotate(180);
+            leftMotor.forward();
+            while (!leftSensor.isPressed()) Delay.msDelay(10);
+            leftMotor.stop();
+            rightMotor.setSpeed(270);
+            if (rightSensor.isPressed()) rightMotor.rotate(180);
+            rightMotor.forward();
+            while (!rightSensor.isPressed()) Delay.msDelay(10);
+            rightMotor.stop();
+            leftMotor.rotate(180);
+            leftCalibratedAngle = leftMotor.getTachoCount() % 360;
+            rightCalibratedAngle = rightMotor.getTachoCount() % 360;
+            isInitiallyCalibrated = true;
         }
     }
 
-    void forward(int speed) {
-        left.setSpeed(speed);
-        right.setSpeed(speed);
-        left.forward();
-        right.forward();
-        isCalibrated = false;
+    void forward(Speed s) {
+        leftMotor.setSpeed(s.getJava());
+        rightMotor.setSpeed(s.getJava());
+        leftMotor.forward();
+        rightMotor.forward();
     }
 
-    void backward(int speed) {
-        left.setSpeed(speed);
-        right.setSpeed(speed);
-        left.backward();
-        right.backward();
-        isCalibrated = false;
+    void backward(Speed speed) {
+        leftMotor.setSpeed(speed.getJava());
+        rightMotor.setSpeed(speed.getJava());
+        leftMotor.backward();
+        rightMotor.backward();
     }
 
     void stop() {
-        left.stop(true);
-        right.stop();
+        leftMotor.stop(true);
+        rightMotor.stop();
     }
 
-    void move(int speed, int steps) {
-        move(speed, steps, false);
+    void move(Speed s, int steps) {
+        move(s, steps, false);
     }
 
-    void move(int speed, int steps, boolean immediateReturn) {
-        left.setSpeed(speed);
-        right.setSpeed(speed);
-        if (speed > 0) {
-            left.rotate(steps * 360, true);
-            right.rotate(steps * 360, immediateReturn);
+    void move(Speed s, int steps, boolean immediateReturn) {
+        leftMotor.setSpeed(s.getJava());
+        rightMotor.setSpeed(s.getJava());
+        if (s.isPositive()) {
+            leftMotor.rotate(steps * 360, true);
+            rightMotor.rotate(steps * 360, immediateReturn);
         } else {
-            left.rotate(steps * -360, true);
-            right.rotate(steps * -360, immediateReturn);
+            leftMotor.rotate(steps * -360, true);
+            rightMotor.rotate(steps * -360, immediateReturn);
         }
     }
 
-    void turn(int speed, int degrees) {
+    void turn(Speed s, int degrees) {
+        // Die Motoren müssen sich um degrees * rotationFactor Grad drehen, damit sich der Roboter um degrees dreht
+        //Herausgefunden durch Trial-and-Error
+        final int rotationFactor = 60;
         if (degrees < 0) {
             calibrate();
-            left.rotate(180);
-            right.rotate(36 + 180);
-            left.setSpeed(speed);
-            left.rotate(60 * degrees);
+            leftMotor.rotate(180);
+            rightMotor.rotate(36 + 180);
+            leftMotor.setSpeed(s.getJava());
+            leftMotor.rotate(rotationFactor * degrees);
         } else {
             calibrate();
-            left.rotate(36);
-            right.setSpeed(speed);
-            right.rotate(60 * degrees);
+            leftMotor.rotate(36);
+            rightMotor.setSpeed(s.getJava());
+            rightMotor.rotate(rotationFactor * degrees);
         }
-        isCalibrated = false;
+    }
+}
+
+class Speed {
+    // Funktionen wie setSpeed() messen Geschwindigkeit in Grad/Sekunde. Der grafische Programmeditor
+    // misst Geschwindigkeit in Umdrehungen/Minute, deshalb diese Klasse zum einfachen Umrechnen
+    private final int javaSpeed; //Geschwindigkeit in Grad/Sekunde
+
+    private Speed(int javaSpeed) {
+        this.javaSpeed = javaSpeed;
+    }
+
+    static Speed java(int value) {
+        return new Speed(value);
+    }
+
+    static Speed ev3(int value) {
+        return new Speed(value * 6);
+    }
+
+    int getJava() {
+        return javaSpeed;
+    }
+
+    int getEv3() {
+        return javaSpeed / 6;
+    }
+
+    boolean isPositive() {
+        return javaSpeed > 0;
     }
 }
 
