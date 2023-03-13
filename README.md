@@ -1,3 +1,24 @@
+# Informationen zu diesem Projekt
+
+## Allgemein
+
+Wir haben für die Schule einen EV3 mit Java programmiert und in diesem Projekt ist der Sourcecode davon.
+
+Auch hier enthalten ist eine Präsentation zu dem Thema (geschrieben mit [Reveal.js](https://revealjs.com))
+und dieselbe Präsentation in einer einzigen Datei zur Offlinebenutzung (danke an <https://github.com/zTrix/webpage2html>)
+
+## Orte
+
+Alle Programme sind unter [src/main/java/roboter](), unter [presentation/reveal.js/index.html]() findet sich die Präsentation
+und die Offline-Version davon ist in [presentation/reveal.js/presentation_offline.html]().
+
+## Anderes
+
+- Der Code ist noch ein bisschen verbuggt und noch längst nicht fertig
+- Die Original readme.md (aus dem ev3dev-lang-java template project) ist unter diesem Text.
+
+-------------
+
 # Template project with Gradle
 
 ## Why
