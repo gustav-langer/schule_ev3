@@ -3,16 +3,19 @@ package roboter;
 import ev3dev.actuators.LCD;
 import ev3dev.actuators.lego.motors.NXTRegulatedMotor;
 import ev3dev.robotics.tts.Espeak;
+import ev3dev.sensors.EV3Key;
 import ev3dev.sensors.ev3.EV3TouchSensor;
 import ev3dev.utils.JarResource;
 import ev3dev.utils.Shell;
 import ev3dev.utils.Sysfs;
+import lejos.hardware.Key;
 import lejos.hardware.lcd.GraphicsLCD;
 import lejos.hardware.port.MotorPort;
 import lejos.hardware.port.SensorPort;
 import lejos.robotics.RegulatedMotor;
 import lejos.robotics.Touch;
-import lejos.utility.Delay;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,11 +37,15 @@ Ideen:
  */
 
 public class Main {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) {
         Robot robot = new Robot(true);
+        demo(robot);
+    }
+
+    static void demo(@NotNull Robot robot) {
+        Speed baseSpeed = Speed.ev3(45);
         LOGGER.info("Roboter erzeugt!");
         try {
             robot.getLcd().drawImage(JarResource.loadImage(JarResource.JAVA_DUKE_IMAGE_NAME), 35, 10, 0);
@@ -46,35 +53,39 @@ public class Main {
         } catch (IOException e) {
             LOGGER.info("Couldn't load image");
         }
-        robot.move(Speed.ev3(45), 7);
+        robot.move(baseSpeed, 7);
         robot.say("Hello");
-        robot.move(Speed.ev3(-45), 7);
-        robot.turn(Speed.ev3(50), -90);
-        CompletableFuture<Void> songFuture = robot.startPlayingFile("song.wav");
-        try {
-            songFuture.get();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        robot.move(baseSpeed.neg(), 7);
+        robot.turn(baseSpeed.offset(5), -90);
+        robot.startPlayingFile("song2.wav").whenComplete((v, e) -> {
+            if ((e) != null) {
+                throw new RuntimeException(e);
+            } else System.exit(0);
+        });
+        LOGGER.info("startPlayingFile returned");
+        robot.any.waitForPressAndRelease();
+        robot.stopAudio();
+        LOGGER.info("stopped");
     }
 }
 
 class Robot {
-
+    static final boolean USE_INIT_ASYNC = false;
     private static final Logger LOGGER = LoggerFactory.getLogger(Robot.class);
-    private final Espeak espeak = new Espeak();
-    private GraphicsLCD lcd;
+    Key any = new EV3Key(EV3Key.BUTTON_ALL);
     private RegulatedMotor rightMotor;
     private RegulatedMotor leftMotor;
     private Touch leftSensor;
     private Touch rightSensor;
-    private boolean isInitiallyCalibrated = false;
+    private GraphicsLCD lcd;
+    private Espeak espeak = new Espeak();
+    private boolean isInitiallyCalibrated = false; // Wird beim ersten Kalibrieren auf true gesetzt
     private int leftCalibratedAngle;
     private int rightCalibratedAngle;
 
     Robot(boolean doImmediateCalibration) {
-        Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
-        if (true) { //true für asynchron, false für synchron
+        Runtime.getRuntime().addShutdownHook(new Thread(this::stop)); // Roboter stoppen, wenn das Programm endet
+        if (USE_INIT_ASYNC) {
             try {
                 initAsync(doImmediateCalibration);
             } catch (Exception e) {
@@ -88,55 +99,54 @@ class Robot {
     }
 
     private void initAsync(boolean doImmediateCalibration) throws ExecutionException, InterruptedException {
-        /*List<File> motoren = Sysfs.getElements("/sys/class/tacho-motor");
-        //LOGGER.info(motoren.toString());
-        //for (File motor : motoren) {
-            LOGGER.info(Sysfs.getElements(motor.getPath()).toString());
-        }*/
         CompletableFuture<RegulatedMotor> leftFuture = CompletableFuture.<RegulatedMotor>supplyAsync(() -> new NXTRegulatedMotor(MotorPort.C))
                 .exceptionally((e) -> {
-                    LOGGER.info("Motor C not found");
+            LOGGER.info("Motor C not found");
                     // Immer wieder versuchen, den Motor zu finden, da der Roboter manchmal beim ersten oder zweiten Aufruf zu langsam ist.
-                    while (true) {
-                        try {
-                            return new NXTRegulatedMotor(MotorPort.C);
-                        } catch (RuntimeException f) {
-                            LOGGER.info("Motor C not found");
-                        }
-                    }
-                });
+            while (true) {
+                try {
+                    return new NXTRegulatedMotor(MotorPort.C);
+                } catch (RuntimeException f) {
+                    LOGGER.info("Motor C not found");
+                }
+            }
+        });
+        LOGGER.info("Starting left (C), sleeping");
+        //Thread.sleep(10000);
+        //LOGGER.info("Sleep done");
         CompletableFuture<RegulatedMotor> rightFuture = CompletableFuture.<RegulatedMotor>supplyAsync(() -> new NXTRegulatedMotor(MotorPort.B))
                 .exceptionally((e) -> {
+            LOGGER.info("Motor B not found");
+            while (true) {
+                try {
+                    return new NXTRegulatedMotor(MotorPort.B);
+                } catch (RuntimeException f) {
                     LOGGER.info("Motor B not found");
-                    while (true) {
-                        try {
-                            return new NXTRegulatedMotor(MotorPort.B);
-                        } catch (RuntimeException f) {
-                            LOGGER.info("Motor B not found");
-                        }
-                    }
-                });
+                }
+            }
+        });
+        LOGGER.info("Starting right (B), sleeping");
+        //Thread.sleep(10000);
+        //LOGGER.info("Sleep done");
         CompletableFuture<Touch> leftSensorFuture = CompletableFuture.<Touch>supplyAsync(() -> new EV3TouchSensor(SensorPort.S2))
                 .exceptionally((e) -> {
-                    LOGGER.info("Sensor S2 not found");
-                    // Wenn das passiert, wurde der Sensor nicht erkannt. Mit Sysfs.writeString kann man den Sensormodus manuell setzen
-                    Sysfs.writeString("/sys/class/lego-port/port1/set_device", "lego-nxt-touch");
-                    return new EV3TouchSensor(SensorPort.S2);
-                });
+            LOGGER.info("Sensor S2 not found");
+            // Wenn das passiert, wurde der Sensor nicht erkannt. Mit Sysfs.writeString kann man den Sensormodus manuell setzen
+            Sysfs.writeString("/sys/class/lego-port/port1/set_device", "lego-nxt-touch");
+            return new EV3TouchSensor(SensorPort.S2);
+        });
         CompletableFuture<Touch> rightSensorFuture = CompletableFuture.<Touch>supplyAsync(() -> new EV3TouchSensor(SensorPort.S1))
                 .exceptionally((e) -> {
-                    LOGGER.info("Sensor S1 not found");
-                    Sysfs.writeString("/sys/class/lego-port/port0/set_device", "lego-nxt-touch");
-                    return new EV3TouchSensor(SensorPort.S1);
-                });
+            LOGGER.info("Sensor S1 not found");
+            Sysfs.writeString("/sys/class/lego-port/port0/set_device", "lego-nxt-touch");
+            return new EV3TouchSensor(SensorPort.S1);
+        });
         CompletableFuture<GraphicsLCD> lcdFuture = CompletableFuture.supplyAsync(LCD::getInstance);
-
         try {
             leftMotor = leftFuture.get(1, TimeUnit.MINUTES);
             rightMotor = rightFuture.get(1, TimeUnit.MINUTES);
         } catch (TimeoutException e) {
             LOGGER.error("Motors timed out");
-            e.printStackTrace();
             throw new RuntimeException(e);
         }
         leftSensor = leftSensorFuture.get();
@@ -145,6 +155,7 @@ class Robot {
             if (doImmediateCalibration) calibrate(true);
         });
         lcd = lcdFuture.get();
+        espeak = new Espeak();
         calibrateFuture.get(); // Warten, bis das Kalibrieren abgeschlossen ist
     }
 
@@ -161,6 +172,7 @@ class Robot {
             rightSensor = new EV3TouchSensor(SensorPort.S1);
         }
         lcd = LCD.getInstance();
+        espeak = new Espeak();
         if (doImmediateCalibration) {
             calibrate(true);
         }
@@ -174,15 +186,16 @@ class Robot {
         if (forceCalibrate || !isInitiallyCalibrated
                 || (leftCalibratedAngle != leftMotor.getTachoCount() % 360)
                 || (rightCalibratedAngle != rightMotor.getTachoCount() % 360)) {
-            leftMotor.setSpeed(270);
+            int calibrateSpeed = 270;
+            leftMotor.setSpeed(calibrateSpeed);
             if (leftSensor.isPressed()) leftMotor.rotate(180);
             leftMotor.forward();
-            while (!leftSensor.isPressed()) Delay.msDelay(10);
+            while (!leftSensor.isPressed()) Thread.onSpinWait();
             leftMotor.stop();
-            rightMotor.setSpeed(270);
+            rightMotor.setSpeed(calibrateSpeed);
             if (rightSensor.isPressed()) rightMotor.rotate(180);
             rightMotor.forward();
-            while (!rightSensor.isPressed()) Delay.msDelay(10);
+            while (!rightSensor.isPressed()) Thread.onSpinWait();
             rightMotor.stop();
             leftMotor.rotate(180);
             leftCalibratedAngle = leftMotor.getTachoCount() % 360;
@@ -191,16 +204,16 @@ class Robot {
         }
     }
 
-    void forward(Speed s) {
+    void forward(@NotNull Speed s) {
         leftMotor.setSpeed(s.getJava());
         rightMotor.setSpeed(s.getJava());
         leftMotor.forward();
         rightMotor.forward();
     }
 
-    void backward(Speed speed) {
-        leftMotor.setSpeed(speed.getJava());
-        rightMotor.setSpeed(speed.getJava());
+    void backward(@NotNull Speed s) {
+        leftMotor.setSpeed(s.getJava());
+        rightMotor.setSpeed(s.getJava());
         leftMotor.backward();
         rightMotor.backward();
     }
@@ -214,7 +227,7 @@ class Robot {
         move(s, steps, false);
     }
 
-    void move(Speed s, int steps, boolean immediateReturn) {
+    void move(@NotNull Speed s, int steps, boolean immediateReturn) {
         leftMotor.setSpeed(s.getJava());
         rightMotor.setSpeed(s.getJava());
         if (s.isPositive()) {
@@ -245,7 +258,7 @@ class Robot {
     }
 
     GraphicsLCD getLcd() {
-        return lcd;
+        return this.lcd;
     }
 
     void say(String message) {
@@ -254,14 +267,16 @@ class Robot {
     }
 
     CompletableFuture<Void> startPlayingFile(String path) {
-        return CompletableFuture.runAsync(() -> Shell.execute("aplay < " + path));
+        return CompletableFuture.runAsync(() -> playFile(path));
     }
 
     void playFile(String path) {
-        Shell.execute("aplay < " + path);
+        Shell.execute("aplay " + path);
     }
 
-
+    void stopAudio() {
+        Shell.execute("killall aplay");
+    }
 }
 
 class Speed {
@@ -273,11 +288,13 @@ class Speed {
         this.javaSpeed = javaSpeed;
     }
 
-    static Speed java(int value) {
+    @Contract(value = "_ -> new", pure = true)
+    static @NotNull Speed java(int value) {
         return new Speed(value);
     }
 
-    static Speed ev3(int value) {
+    @Contract(value = "_ -> new", pure = true)
+    static @NotNull Speed ev3(int value) {
         return new Speed(value * 6);
     }
 
@@ -291,6 +308,18 @@ class Speed {
 
     boolean isPositive() {
         return javaSpeed > 0;
+    }
+
+    Speed offset(int offset) {
+        return Speed.java(this.javaSpeed + offset);
+    }
+
+    Speed mult(int factor) {
+        return Speed.java(this.javaSpeed * factor);
+    }
+
+    Speed neg() {
+        return mult(-1);
     }
 }
 
