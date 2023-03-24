@@ -1,0 +1,39 @@
+<root>
+    <item name='roboter.Main void dance(roboter.Robot, int) 0'>
+        <annotation name='org.jetbrains.annotations.NotNull'/>
+    </item>
+    <item name='roboter.Main void demo(roboter.Robot) 0'>
+        <annotation name='org.jetbrains.annotations.NotNull'/>
+    </item>
+    <item name='roboter.Main void runDance(roboter.Robot, roboter.Speed, java.util.List&lt;roboter.DanceMove&gt;) 2'>
+        <annotation name='org.jetbrains.annotations.NotNull'/>
+    </item>
+    <item name='roboter.Robot espeak'>
+        <annotation name='java.lang.SuppressWarnings'>
+            <val val="&quot;FieldMayBeFinal&quot;"/>
+        </annotation>
+    </item>
+    <item name='roboter.Robot void backward(roboter.Speed) 0'>
+        <annotation name='org.jetbrains.annotations.NotNull'/>
+    </item>
+    <item name='roboter.Robot void forward(roboter.Speed) 0'>
+        <annotation name='org.jetbrains.annotations.NotNull'/>
+    </item>
+    <item name='roboter.Robot void move(roboter.Speed, int, boolean) 0'>
+        <annotation name='org.jetbrains.annotations.NotNull'/>
+    </item>
+    <item name='roboter.Speed roboter.Speed ev3(int)'>
+        <annotation name='org.jetbrains.annotations.NotNull'/>
+        <annotation name='org.jetbrains.annotations.Contract'>
+            <val name="value" val="&quot;_ -&gt; new&quot;"/>
+            <val name="pure" val="true"/>
+        </annotation>
+    </item>
+    <item name='roboter.Speed roboter.Speed java(int)'>
+        <annotation name='org.jetbrains.annotations.NotNull'/>
+        <annotation name='org.jetbrains.annotations.Contract'>
+            <val name="value" val="&quot;_ -&gt; new&quot;"/>
+            <val name="pure" val="true"/>
+        </annotation>
+    </item>
+</root>

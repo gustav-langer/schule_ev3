@@ -25,6 +25,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * Represents the robot.
+ * All the low-level code like accessing the hardware and basic movement is here.
+ */
 class Robot {
     static final boolean USE_INIT_ASYNC = false;
     private static final Logger LOGGER = LoggerFactory.getLogger(Robot.class);
@@ -35,11 +39,10 @@ class Robot {
     private Touch leftSensor;
     private Touch rightSensor;
     private GraphicsLCD lcd;
-    @SuppressWarnings("FieldMayBeFinal")
     private Espeak espeak = new Espeak();
     private boolean isInitiallyCalibrated = false; // Wird beim ersten Kalibrieren auf true gesetzt
-    private int leftCalibratedAngle;
-    private int rightCalibratedAngle;
+    private int leftCalibratedAngle; // In diesem Winkel ist der linke Fuß kalibriert. Kann unnötiges Kalibrieren vermeiden
+    private int rightCalibratedAngle; // Dasselbe wie leftCalibratedAngle
 
     Robot(boolean doImmediateCalibration) {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -50,18 +53,25 @@ class Robot {
             try {
                 initAsync(doImmediateCalibration);
             } catch (Exception e) {
-                e.printStackTrace();
-                System.err.flush();
-                throw new RuntimeException();
+                throw new RuntimeException(e);
             }
         } else {
             init(doImmediateCalibration);
         }
     }
 
+    /**
+     * Initializes this robot's hardware and optionally calibrates the motors.
+     * Uses an asynchronous approach.
+     *
+     * @param doImmediateCalibration If the robot should be immediately calibrated
+     * @throws ExecutionException   if any hardware piece encountered an error while initializing
+     * @throws InterruptedException if one of the asynchronous threads was interrupted
+     */
     private void initAsync(boolean doImmediateCalibration) throws ExecutionException, InterruptedException {
-        EV3DevPlatforms.getInstance(); //Einmal initialisieren, damit das Asynchrone nicht kaputtgeht
-        CompletableFuture<RegulatedMotor> leftFuture = CompletableFuture.<RegulatedMotor>supplyAsync(() -> new NXTRegulatedMotor(MotorPort.C))
+        EV3DevPlatforms.getInstance(); //Einmal initialisieren, weil EV3DevPlatforms nicht thread-sicher ist
+        CompletableFuture<RegulatedMotor> leftFuture = CompletableFuture.<RegulatedMotor>
+                        supplyAsync(() -> new NXTRegulatedMotor(MotorPort.C))
                 .exceptionally((e) -> {
                     LOGGER.info("Motor C not found");
                     // Immer wieder versuchen, den Motor zu finden, da der Roboter manchmal beim ersten oder zweiten Aufruf zu langsam ist.
@@ -74,8 +84,8 @@ class Robot {
                         }
                     }
                 });
-        LOGGER.info("Starting left (C), sleeping");
-        CompletableFuture<RegulatedMotor> rightFuture = CompletableFuture.<RegulatedMotor>supplyAsync(() -> new NXTRegulatedMotor(MotorPort.B))
+        CompletableFuture<RegulatedMotor> rightFuture = CompletableFuture.<RegulatedMotor>
+                        supplyAsync(() -> new NXTRegulatedMotor(MotorPort.B))
                 .exceptionally((e) -> {
                     LOGGER.info("Motor B not found");
                     while (true) {
@@ -87,15 +97,16 @@ class Robot {
                         }
                     }
                 });
-        LOGGER.info("Starting right (B), sleeping");
-        CompletableFuture<Touch> leftSensorFuture = CompletableFuture.<Touch>supplyAsync(() -> new EV3TouchSensor(SensorPort.S2))
+        CompletableFuture<Touch> leftSensorFuture = CompletableFuture.<Touch>
+                        supplyAsync(() -> new EV3TouchSensor(SensorPort.S2))
                 .exceptionally((e) -> {
                     LOGGER.info("Sensor S2 not found");
                     // Wenn das passiert, wurde der Sensor nicht erkannt. Mit Sysfs.writeString kann man den Sensormodus manuell setzen
                     Sysfs.writeString("/sys/class/lego-port/port1/set_device", "lego-nxt-touch");
                     return new EV3TouchSensor(SensorPort.S2);
                 });
-        CompletableFuture<Touch> rightSensorFuture = CompletableFuture.<Touch>supplyAsync(() -> new EV3TouchSensor(SensorPort.S1))
+        CompletableFuture<Touch> rightSensorFuture = CompletableFuture.<Touch>
+                        supplyAsync(() -> new EV3TouchSensor(SensorPort.S1))
                 .exceptionally((e) -> {
                     LOGGER.info("Sensor S1 not found");
                     Sysfs.writeString("/sys/class/lego-port/port0/set_device", "lego-nxt-touch");
@@ -118,6 +129,12 @@ class Robot {
         calibrateFuture.get(); // Warten, bis das Kalibrieren abgeschlossen ist
     }
 
+    /**
+     * Initializes this robot's hardware and optionally calibrates the motors.
+     * Uses synchronous approach.
+     *
+     * @param doImmediateCalibration If the robot should be immediately calibrated
+     */
     private void init(boolean doImmediateCalibration) {
         leftMotor = new NXTRegulatedMotor(MotorPort.C);
         rightMotor = new NXTRegulatedMotor(MotorPort.B);
@@ -162,6 +179,11 @@ class Robot {
         }
     }
 
+    /**
+     * Moves the robot forward at a constant speed, assuming it is calibrated.
+     *
+     * @param s The speed to move at
+     */
     @SuppressWarnings("unused")
     void forward(Speed s) {
         leftMotor.setSpeed(s.getJava());
@@ -170,6 +192,11 @@ class Robot {
         rightMotor.forward();
     }
 
+    /**
+     * Moves the robot backward at a constant speed, assuming it is calibrated.
+     *
+     * @param s The speed to move at
+     */
     @SuppressWarnings("unused")
     void backward(Speed s) {
         leftMotor.setSpeed(s.getJava());
@@ -178,15 +205,32 @@ class Robot {
         rightMotor.backward();
     }
 
+    /**
+     * Stops the robot from moving any further.
+     */
     void stop() {
         leftMotor.stop(true);
         rightMotor.stop();
     }
 
+    /**
+     * Moves the robot a fixed amount of steps.
+     *
+     * @param s     The speed to move at
+     * @param steps How much to move by
+     */
     void move(Speed s, int steps) {
         move(s, steps, false);
     }
 
+    /**
+     * Moves the robot a fixed amount of steps. Also supports not waiting for the motors to finish turning.
+     *
+     * @param s               The speed to move at
+     * @param steps           How much to move by
+     * @param immediateReturn Iff true, method returns immediately
+     */
+    @SuppressWarnings("SameParameterValue")
     void move(Speed s, int steps, boolean immediateReturn) {
         leftMotor.setSpeed(s.getJava());
         rightMotor.setSpeed(s.getJava());
@@ -199,6 +243,12 @@ class Robot {
         }
     }
 
+    /**
+     * Turns the robot.
+     *
+     * @param s       The speed to turn at
+     * @param degrees How many degrees to turn by, counted clockwise
+     */
     @SuppressWarnings("SameParameterValue")
     void turn(Speed s, int degrees) {
         // Die Motoren müssen sich um degrees * rotationFactor Grad drehen, damit sich der Roboter um degrees dreht
@@ -222,31 +272,67 @@ class Robot {
         return this.lcd;
     }
 
+    /**
+     * Draws an image on the screen.
+     * Equivalent to {@code getLcd().drawImage(...);
+     * getLcd().refresh();}.
+     *
+     * @param src    Image to draw
+     * @param x      Destination
+     * @param y      Destination
+     * @param anchor Location of the anchor point
+     * @see GraphicsLCD#drawImage(Image, int, int, int)
+     */
     @SuppressWarnings("SameParameterValue")
     void drawImageAndRefresh(Image src, int x, int y, int anchor) {
         lcd.drawImage(src, x, y, anchor);
         lcd.refresh();
     }
 
+    /**
+     * Says a message using Espeak.
+     *
+     * @param message The message
+     * @see Espeak
+     */
     @SuppressWarnings("SameParameterValue")
     void say(String message) {
         espeak.setMessage(message);
         espeak.say();
     }
 
+    /**
+     * Starts playing an audio file. Returns immediately to allow for other things while the song plays.
+     * <em>WARNING! Not protected against code injections through </em>{@code path}!
+     *
+     * @param path The path to the audio file
+     * @return A CompletableFuture playing the file. May be discarded without interrupting the song.
+     */
     @SuppressWarnings("SameParameterValue")
     CompletableFuture<Void> startPlayingFile(String path) {
         return CompletableFuture.runAsync(() -> playFile(path));
     }
 
+    /**
+     * Plays an audio file. Waits for it to be finished before returning.
+     * <em>WARNING! Not protected against code injections through </em>{@code path}!
+     *
+     * @param path The path to the audio file
+     */
     void playFile(String path) {
         Shell.execute("aplay " + path);
     }
 
+    /**
+     * Stops all sounds.
+     */
     void stopAudio() {
         Shell.execute("killall aplay");
     }
 
+    /**
+     * Beeps once.
+     */
     void beep() {
         sound.beep();
     }
