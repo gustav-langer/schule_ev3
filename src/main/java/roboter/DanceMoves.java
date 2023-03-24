@@ -1,8 +1,8 @@
 package roboter;
 
 class DanceMoves {
-    static final DanceMove ONE_STEP = (r, s) -> {
-        r.move(s, 1);
-        r.move(s, -1);
+    static final DanceMove ONE_STEP = (robot, speed) -> {
+        robot.move(speed, 1);
+        robot.move(speed, -1);
     };
 }

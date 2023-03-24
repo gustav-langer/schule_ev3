@@ -29,10 +29,12 @@ class Speed {
         return javaSpeed > 0;
     }
 
+    @SuppressWarnings("SameParameterValue")
     Speed offset(int offset) {
         return Speed.java(this.javaSpeed + offset);
     }
 
+    @SuppressWarnings("SameParameterValue")
     Speed mult(int factor) {
         return Speed.java(this.javaSpeed * factor);
     }

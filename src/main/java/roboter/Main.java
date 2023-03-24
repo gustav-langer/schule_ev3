@@ -51,8 +51,6 @@ public class Main {
         }
         robot.startPlayingFile("song.wav");
         Delay.msDelay(Math.round(msPerBeat * 16));
-        /*robot.move(baseSpeed.mult(2), 8);
-        robot.move(baseSpeed.mult(2).neg(), 8);*/
         runDance(robot, baseSpeed, dance);
         robot.stopAudio();
     }

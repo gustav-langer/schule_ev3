@@ -35,6 +35,7 @@ class Robot {
     private Touch leftSensor;
     private Touch rightSensor;
     private GraphicsLCD lcd;
+    @SuppressWarnings("FieldMayBeFinal")
     private Espeak espeak = new Espeak();
     private boolean isInitiallyCalibrated = false; // Wird beim ersten Kalibrieren auf true gesetzt
     private int leftCalibratedAngle;
@@ -74,8 +75,6 @@ class Robot {
                     }
                 });
         LOGGER.info("Starting left (C), sleeping");
-        //Thread.sleep(10000);
-        //LOGGER.info("Sleep done");
         CompletableFuture<RegulatedMotor> rightFuture = CompletableFuture.<RegulatedMotor>supplyAsync(() -> new NXTRegulatedMotor(MotorPort.B))
                 .exceptionally((e) -> {
                     LOGGER.info("Motor B not found");
@@ -89,8 +88,6 @@ class Robot {
                     }
                 });
         LOGGER.info("Starting right (B), sleeping");
-        //Thread.sleep(10000);
-        //LOGGER.info("Sleep done");
         CompletableFuture<Touch> leftSensorFuture = CompletableFuture.<Touch>supplyAsync(() -> new EV3TouchSensor(SensorPort.S2))
                 .exceptionally((e) -> {
                     LOGGER.info("Sensor S2 not found");
@@ -118,7 +115,6 @@ class Robot {
             if (doImmediateCalibration) calibrate(true);
         });
         lcd = lcdFuture.get();
-        espeak = new Espeak();
         calibrateFuture.get(); // Warten, bis das Kalibrieren abgeschlossen ist
     }
 
@@ -135,7 +131,6 @@ class Robot {
             rightSensor = new EV3TouchSensor(SensorPort.S1);
         }
         lcd = LCD.getInstance();
-        espeak = new Espeak();
         if (doImmediateCalibration) {
             calibrate(true);
         }
@@ -145,7 +140,7 @@ class Robot {
         calibrate(false);
     }
 
-    void calibrate(boolean forceCalibrate) {
+    void calibrate(boolean forceCalibrate) { //FIXME
         if (forceCalibrate || !isInitiallyCalibrated
                 || (leftCalibratedAngle != leftMotor.getTachoCount() % 360)
                 || (rightCalibratedAngle != rightMotor.getTachoCount() % 360)) {
@@ -167,6 +162,7 @@ class Robot {
         }
     }
 
+    @SuppressWarnings("unused")
     void forward(Speed s) {
         leftMotor.setSpeed(s.getJava());
         rightMotor.setSpeed(s.getJava());
@@ -174,6 +170,7 @@ class Robot {
         rightMotor.forward();
     }
 
+    @SuppressWarnings("unused")
     void backward(Speed s) {
         leftMotor.setSpeed(s.getJava());
         rightMotor.setSpeed(s.getJava());
@@ -202,6 +199,7 @@ class Robot {
         }
     }
 
+    @SuppressWarnings("SameParameterValue")
     void turn(Speed s, int degrees) {
         // Die Motoren müssen sich um degrees * rotationFactor Grad drehen, damit sich der Roboter um degrees dreht
         //Herausgefunden durch Trial-and-Error
@@ -224,16 +222,19 @@ class Robot {
         return this.lcd;
     }
 
+    @SuppressWarnings("SameParameterValue")
     void drawImageAndRefresh(Image src, int x, int y, int anchor) {
         lcd.drawImage(src, x, y, anchor);
         lcd.refresh();
     }
 
+    @SuppressWarnings("SameParameterValue")
     void say(String message) {
         espeak.setMessage(message);
         espeak.say();
     }
 
+    @SuppressWarnings("SameParameterValue")
     CompletableFuture<Void> startPlayingFile(String path) {
         return CompletableFuture.runAsync(() -> playFile(path));
     }

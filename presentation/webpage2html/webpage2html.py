@@ -16,9 +16,12 @@ from bs4 import BeautifulSoup
 from termcolor import colored
 
 if sys.version > '3':
+    # noinspection PyCompatibility
     from urllib.parse import urlparse, urlunsplit, urljoin, quote
 else:
+    # noinspection PyCompatibility,PyUnresolvedReferences
     from urlparse import urlparse, urlunsplit, urljoin
+    # noinspection PyUnresolvedReferences
     from urllib import quote
 
 re_css_url = re.compile(r'(url\(.*?\))')
@@ -50,7 +53,8 @@ def absurl(index, relpath=None, normpath=None):
             return index
 
 
-def get(index, relpath=None, verbose=True, usecache=True, verify=True, ignore_error=False, username=None, password=None):
+def get(index, relpath=None, verbose=True, usecache=True, verify=True, ignore_error=False, username=None,
+        password=None):
     global webpage2html_cache
     if index.startswith('http') or (relpath and relpath.startswith('http')):
         full_path = absurl(index, relpath)

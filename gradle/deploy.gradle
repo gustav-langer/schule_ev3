@@ -2,7 +2,7 @@ ssh.settings {
     knownHosts = allowAnyHosts
 }
 
-task testConnection {
+tasks.register('testConnection') {
     doLast {
         ssh.run {
             session(remotes.ev3dev) {
@@ -13,7 +13,7 @@ task testConnection {
     }
 }
 
-task free {
+tasks.register('free') {
     doLast {
         ssh.run {
             session(remotes.ev3dev) {
@@ -24,7 +24,7 @@ task free {
     }
 }
 
-task top {
+tasks.register('top') {
     doLast {
         ssh.run {
             session(remotes.ev3dev) {
@@ -35,7 +35,7 @@ task top {
     }
 }
 
-task ps {
+tasks.register('ps') {
     doLast {
         ssh.run {
             session(remotes.ev3dev) {
@@ -46,7 +46,7 @@ task ps {
     }
 }
 
-task stopBluetooth {
+tasks.register('stopBluetooth') {
     doLast {
         ssh.run {
             session(remotes.ev3dev) {
@@ -57,7 +57,7 @@ task stopBluetooth {
     }
 }
 
-task ev3devInfo {
+tasks.register('ev3devInfo') {
     doLast {
         ssh.run {
             session(remotes.ev3dev) {
@@ -68,7 +68,7 @@ task ev3devInfo {
     }
 }
 
-task pkillJava {
+tasks.register('pkillJava') {
     doLast {
         ssh.run {
             session(remotes.ev3dev) {
@@ -79,7 +79,7 @@ task pkillJava {
     }
 }
 
-task removePreviousJar {
+tasks.register('removePreviousJar') {
     doLast {
         ssh.run {
             session(remotes.ev3dev) {
@@ -92,7 +92,7 @@ task removePreviousJar {
     }
 }
 
-task deploy {
+tasks.register('deploy') {
     doLast {
         ssh.run {
             session(remotes.ev3dev) {
@@ -106,7 +106,7 @@ task deploy {
 
 deploy.dependsOn clean, fatJar
 
-task remoteRun {
+tasks.register('remoteRun') {
     doLast {
         ssh.run {
             session(remotes.ev3dev) {
@@ -117,7 +117,7 @@ task remoteRun {
     }
 }
 
-task remoteBrickRun {
+tasks.register('remoteBrickRun') {
     doLast {
         ssh.run {
             session(remotes.ev3dev) {
@@ -128,7 +128,7 @@ task remoteBrickRun {
     }
 }
 
-task remoteRunClassVerbose {
+tasks.register('remoteRunClassVerbose') {
     doLast {
         ssh.run {
             session(remotes.ev3dev) {
@@ -139,7 +139,7 @@ task remoteRunClassVerbose {
     }
 }
 
-task remoteSudoRun {
+tasks.register('remoteSudoRun') {
     doLast {
         ssh.run {
             session(remotes.ev3dev) {
@@ -150,7 +150,7 @@ task remoteSudoRun {
     }
 }
 
-task remoteProfilingRun {
+tasks.register('remoteProfilingRun') {
     doLast {
         ssh.run {
             session(remotes.ev3dev) {
@@ -161,7 +161,7 @@ task remoteProfilingRun {
     }
 }
 
-task remoteProfilingSudoRun {
+tasks.register('remoteProfilingSudoRun') {
     doLast {
         ssh.run {
             session(remotes.ev3dev) {
@@ -172,31 +172,31 @@ task remoteProfilingSudoRun {
     }
 }
 
-task deployAndRun {
+tasks.register('deployAndRun') {
     doLast {
     }
 }
 deployAndRun.dependsOn deploy, remoteRun
 
-task deployAndBrickRun {
+tasks.register('deployAndBrickRun') {
     doLast {
     }
 }
 deployAndBrickRun.dependsOn deploy, remoteBrickRun
 
-task deployAndSudoRun {
+tasks.register('deployAndSudoRun') {
     doLast {
     }
 }
 deployAndSudoRun.dependsOn deploy, remoteSudoRun
 
-task deployAndProfilingRun {
+tasks.register('deployAndProfilingRun') {
     doLast {
     }
 }
 deployAndProfilingRun.dependsOn deploy, remoteProfilingRun
 
-task deployAndProfilingSudoRun {
+tasks.register('deployAndProfilingSudoRun') {
     doLast {
     }
 }

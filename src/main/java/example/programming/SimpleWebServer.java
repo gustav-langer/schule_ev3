@@ -23,6 +23,7 @@ public class SimpleWebServer {
 
   }
 
+  @SuppressWarnings("InfiniteLoopStatement")
   public void run() throws IOException {
     for (;;) {
       sock = ss.accept();
@@ -54,6 +55,7 @@ public class SimpleWebServer {
 
     if (tokens.length > 1 && tokens[0].equals("GET")) {
 
+      //noinspection StatementWithEmptyBody
       if (tokens[1].equals("/stop")) {
         LOGGER.info("{}", tokens[1]);
         System.exit(0);
