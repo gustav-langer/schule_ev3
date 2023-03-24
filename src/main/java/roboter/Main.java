@@ -8,7 +8,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.List;
 
-import static roboter.DanceMoves.ONE_STEP;
+import static roboter.DanceMoves.EXAMPLE1;
+import static roboter.DanceMoves.EXAMPLE2;
 
 /*
 Was der Roboter können muss:
@@ -42,11 +43,11 @@ public class Main {
     static void dance(Robot robot, int bpm) {
         var msPerBeat = 60000 / bpm;
         Speed baseSpeed = Speed.ev3(bpm / 4);// baseSpeed ~= 1 Umdrehung/Takt
-        List<DanceMove> dance = List.of(ONE_STEP,
-                ONE_STEP,
-                ONE_STEP,
-                ONE_STEP,
-                ONE_STEP);
+        List<DanceMove> dance = List.of(EXAMPLE1,
+                EXAMPLE1,
+                EXAMPLE2,
+                EXAMPLE2,
+                EXAMPLE1);
         try {
             robot.getLcd().drawImage(JarResource.loadImage("java_logo_2.png"), 35, 10, 0);
             robot.getLcd().refresh();
