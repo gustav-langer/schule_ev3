@@ -23,6 +23,10 @@ Ideen:
 
 //todo: Annotations hinkriegen
 
+/**
+ * The main class of this project.
+ * Contains all the business logic.
+ */
 public class Main {
     private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
@@ -31,14 +35,14 @@ public class Main {
         LOGGER.info("Roboter erzeugt!");
         robot.beep();
         robot.any.waitForPressAndRelease();
-        dance(robot, args.length == 0 ? 120 : Integer.parseInt(args[0]));
+        dance(robot, 120);
     }
 
+    @SuppressWarnings("SameParameterValue")
     static void dance(Robot robot, int bpm) {
         var msPerBeat = 60000 / bpm;
         Speed baseSpeed = Speed.ev3(bpm / 4);// baseSpeed ~= 1 Umdrehung/Takt
-        List<DanceMove> dance = List.of(
-                ONE_STEP,
+        List<DanceMove> dance = List.of(ONE_STEP,
                 ONE_STEP,
                 ONE_STEP,
                 ONE_STEP,
@@ -55,10 +59,18 @@ public class Main {
         robot.stopAudio();
     }
 
+    /**
+     * Executes a given dance.
+     *
+     * @param robot The robot executing the dance
+     * @param speed The optimal speed (in most cases, the BPM of the song)
+     * @param dance The dance, represented as a List of {@link DanceMove}
+     */
     static void runDance(Robot robot, Speed speed, List<DanceMove> dance) {
         dance.forEach((move) -> move.execute(robot, speed));
     }
 
+    @SuppressWarnings("unused")
     static void demo(Robot robot) {
         Speed baseSpeed = Speed.ev3(45);
         try {
@@ -69,7 +81,7 @@ public class Main {
         robot.move(baseSpeed, 7);
         robot.say("Hello");
         robot.move(baseSpeed.neg(), 7);
-        robot.turn(baseSpeed.offset(5), -90);
+        robot.turn(baseSpeed.javaOffset(5), -90);
         robot.startPlayingFile("song.wav").whenComplete((v, e) -> {
             if ((e) != null) {
                 throw new RuntimeException(e);
