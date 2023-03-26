@@ -8,11 +8,6 @@
     <item name='roboter.Main void runDance(roboter.Robot, roboter.Speed, java.util.List&lt;roboter.DanceMove&gt;) 2'>
         <annotation name='org.jetbrains.annotations.NotNull'/>
     </item>
-    <item name='roboter.Robot espeak'>
-        <annotation name='java.lang.SuppressWarnings'>
-            <val val="&quot;FieldMayBeFinal&quot;"/>
-        </annotation>
-    </item>
     <item name='roboter.Robot void backward(roboter.Speed) 0'>
         <annotation name='org.jetbrains.annotations.NotNull'/>
     </item>

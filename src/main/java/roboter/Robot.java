@@ -39,6 +39,7 @@ class Robot {
     private Touch leftSensor;
     private Touch rightSensor;
     private GraphicsLCD lcd;
+    @SuppressWarnings("FieldMayBeFinal")
     private Espeak espeak = new Espeak();
     private boolean isInitiallyCalibrated = false; // Wird beim ersten Kalibrieren auf true gesetzt
     private int leftCalibratedAngle; // In diesem Winkel ist der linke Fuß kalibriert. Kann unnötiges Kalibrieren vermeiden
@@ -246,24 +247,25 @@ class Robot {
     /**
      * Turns the robot.
      *
-     * @param s       The speed to turn at
+     * @param turningSpeed       How fast the <b>robot</b> turns (not the motors)
      * @param degrees How many degrees to turn by, counted clockwise
      */
     @SuppressWarnings("SameParameterValue")
-    void turn(Speed s, int degrees) {
+    void turn(Speed turningSpeed, int degrees) {
         // Die Motoren müssen sich um degrees * rotationFactor Grad drehen, damit sich der Roboter um degrees dreht
         //Herausgefunden durch Trial-and-Error
         final int rotationFactor = 60;
+        Speed actualSpeed = turningSpeed.mult(rotationFactor);
         if (degrees < 0) {
             calibrate();
             leftMotor.rotate(180);
             rightMotor.rotate(36 + 180);
-            leftMotor.setSpeed(s.getJava());
+            leftMotor.setSpeed(actualSpeed.getJava());
             leftMotor.rotate(rotationFactor * degrees);
         } else {
             calibrate();
             leftMotor.rotate(36);
-            rightMotor.setSpeed(s.getJava());
+            rightMotor.setSpeed(actualSpeed.getJava());
             rightMotor.rotate(rotationFactor * degrees);
         }
     }

@@ -1,3 +1,4 @@
+//file:noinspection GrUnresolvedAccess
 ssh.settings {
     knownHosts = allowAnyHosts
 }
