@@ -6,7 +6,7 @@ package roboter;
  * This class supports both and can be used to easily convert between the units.
  */
 class Speed {
-    private static final int JAVA_EV3_CONVERSION_FACTOR = 6;
+    private static final int JAVA_EV3_CONVERSION_FACTOR = 6; // (360 degrees / 1 rotation) * (1 minute / 60 seconds)
     private final int javaSpeed; //Geschwindigkeit in Grad/Sekunde
 
     private Speed(int javaSpeed) {
@@ -14,58 +14,45 @@ class Speed {
     }
 
     /**
-     * @param value The speed in degrees per second
+     * @param degreesPerSecond The speed in degrees per second
      * @return A {@link Speed} instance with the desired values
      */
-    static Speed java(int value) {
-        return new Speed(value);
+    static Speed javaSpeed(int degreesPerSecond) {
+        return new Speed(degreesPerSecond);
     }
 
     /**
-     * @param value The speed in rotations per minute
+     * @param rotationsPerMinute The speed in rotations per minute
      * @return A {@link Speed} instance with the desired values
      */
-    static Speed ev3(int value) {
-        return new Speed(value * JAVA_EV3_CONVERSION_FACTOR);
+    static Speed ev3Speed(int rotationsPerMinute) {
+        return new Speed(rotationsPerMinute * JAVA_EV3_CONVERSION_FACTOR);
     }
 
     /**
      * @return The speed in degrees per second
      */
-    int getJava() {
+    int getJavaSpeed() {
         return javaSpeed;
     }
 
     /**
      * @return The speed in rotations per minute
      */
-    int getEv3() {
+    int getEv3Speed() {
         return javaSpeed / JAVA_EV3_CONVERSION_FACTOR;
     }
 
     /**
-     * @return true iff the stored value is greater than 0
+     * @return true if the stored value is greater than 0
      */
+    @SuppressWarnings("unused")
     boolean isPositive() {
         return javaSpeed > 0;
     }
 
-    /**
-     * @param offset The value (in degrees per second) to offset the speed by
-     * @return A new {@link Speed} with the value of the current one offset by {@code offset}
-     */
-    @SuppressWarnings("SameParameterValue")
-    Speed javaOffset(int offset) {
-        return Speed.java(this.getJava() + offset);
-    }
-
-    /**
-     * @param offset The value (in rotations per minute) to offset the speed by
-     * @return A new {@link Speed} with the value of the current one offset by {@code offset}
-     */
-    @SuppressWarnings({"SameParameterValue", "unused"})
-    Speed ev3Offset(int offset) {
-        return Speed.ev3(this.getEv3() + offset);
+    int signum() {
+        return Integer.signum(javaSpeed);
     }
 
     /**
@@ -73,8 +60,8 @@ class Speed {
      * @return A new {@link Speed} with the value of the current one multiplied by {@code factor}
      */
     @SuppressWarnings("SameParameterValue")
-    Speed mult(int factor) {
-        return Speed.java(this.getJava() * factor);
+    Speed mult(float factor) {
+        return Speed.javaSpeed(Math.round(this.getJavaSpeed() * factor));
     }
 
     /**
