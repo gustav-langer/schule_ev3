@@ -1,57 +1,99 @@
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>reveal.js</title>
+    <title>reveal.js</title>
 
-		<link rel="stylesheet" href="dist/reset.css">
-		<link rel="stylesheet" href="dist/reveal.css">
-		<link rel="stylesheet" href="dist/theme/black.css">
+    <link rel="stylesheet" href="dist/reset.css">
+    <link rel="stylesheet" href="dist/reveal.css">
+    <link rel="stylesheet" href="dist/theme/black.css">
 
-		<!-- Theme used for syntax highlighted code -->
-		<link rel="stylesheet" href="plugin/highlight/monokai.css">
-	</head>
-	<body>
-		<div class="reveal">
-			<div class="slides">
-				<section>Slide 1</section>
-				<!--
-				Inhaltsverzeichnis:
-				Roboter vorführen
-				Roboter-Hardware
-				Main-Methode
-				Roboter:
-					Initialisieren
-					Kalibrieren
-				Zurück zu Main
-				Tanzen:
-					Struktur erklären: Tanz in Einzelschritte aufgebaut
-						Interface erklären
-					Einzelne Tanzschritte
-						Speed und RotateAmount
-					[Geschwindigkeitssynchronisierung]
-				Ende
-				-->
-				<section>Slide 2</section>
-			</div>
-		</div>
+    <!-- Theme used for syntax highlighted code -->
+    <link rel="stylesheet" href="plugin/highlight/monokai.css">
+</head>
+<body>
+<div class="reveal">
+    <div class="slides">
+        <section>
+            <p class="r-fit-text">ROBOTER</p>
+            <h2 class="r-fit-text">Von Benjamin und Gustav</h2>
+        </section>
+        <!--
+        Inhaltsverzeichnis:
+        Roboter vorführen
+        Roboter-Hardware
+        Main-Methode
+        Roboter:
+            Initialisieren
+            Kalibrieren
+        Zurück zu Main
+        Tanzen:
+            Struktur erklären: Tanz in Einzelschritte aufgebaut
+                Interface erklären
+            Einzelne Tanzschritte
+                Speed und RotateAmount
+            [Geschwindigkeitssynchronisierung]
+        Ende
+        -->
+        <section>
+            <h2>Inhaltsverzeichnis</h2>
+            <ol>
+                <li>Demonstration</li>
+                <li>Hardware</li>
+                <li>Software</li>
+            </ol>
+        </section>
+        <section>
+            <section data-auto-animate>
+                <h2>Hardware</h2>
+                <ul>
+                    <li>3 Motoren: Linkes Bein, rechtes Bein, Arme</li>
+                </ul>
+                <img src=""> <!-- Hier ein Bild vom Roboter -->
+            </section>
+            <section data-auto-animate>
+                <h2>Hardware</h2>
+                <ul>
+                    <li>3 Motoren: Linkes Bein, rechtes Bein, Arme</li>
+                    <li>2 Sensoren an den Beinen</li>
+                </ul>
+                <img src=""> <!-- Hier ein Bild vom Roboter -->
+            </section>
+        </section>
+        <section>
+            <p class="r-fit-text">Software</p>
+        </section>
+        <section>
+                        <pre><code data-trim>
+                            public class Main {
+                                public static void main(String[] args) {
 
-		<script src="dist/reveal.js"></script>
-		<script src="plugin/notes/notes.js"></script>
-		<script src="plugin/markdown/markdown.js"></script>
-		<script src="plugin/highlight/highlight.js"></script>
-		<script>
-			// More info about initialization & config:
-			// - https://revealjs.com/initialization/
-			// - https://revealjs.com/config/
-			Reveal.initialize({
-				hash: true,
+                                }
+                            }
+                        </code></pre>
+        </section>
+    </div>
+</div>
 
-				// Learn about plugins: https://revealjs.com/plugins/
-				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
-			});
-		</script>
-	</body>
+<script src="dist/reveal.js"></script>
+<script src="plugin/notes/notes.js"></script>
+<script src="plugin/markdown/markdown.js"></script>
+<script src="plugin/highlight/highlight.js"></script>
+<script>
+                // More info about initialization & config:
+                // - https://revealjs.com/initialization/
+                // - https://revealjs.com/config/
+                Reveal.initialize({
+                    hash: true,
+
+                    // Learn about plugins: https://revealjs.com/plugins/
+                    plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
+                });
+
+
+
+</script>
+</body>
 </html>
