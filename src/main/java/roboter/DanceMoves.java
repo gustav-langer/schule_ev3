@@ -29,13 +29,13 @@ class DanceMoves {
     static final DanceMove MOVE_RIGHT_MOTOR = (robot, speed) -> {
         robot.rotateSingleMotor(robot.getLeftMotor(),speed,RotateAmount.rotations(-0.15F-0.5F));
         robot.rotateSingleMotor(robot.getRightMotor(),speed.mult(2),RotateAmount.rotations(8-0.6F));
-        robot.rotateSingleMotor(robot.getLeftMotor(),speed.neg(),RotateAmount.rotations(-0.15F-0.5F));
+        robot.rotateSingleMotor(robot.getLeftMotor(),speed.negate(),RotateAmount.rotations(-0.15F-0.5F));
     };
 
     static final DanceMove MOVE_LEFT_MOTOR = (robot, speed) -> {
         robot.rotateSingleMotor(robot.getRightMotor(), speed, RotateAmount.rotations(-0.15F - 0.5F));
         robot.rotateSingleMotor(robot.getLeftMotor(), speed.mult(2), RotateAmount.rotations(8 - 0.6F));
-        robot.rotateSingleMotor(robot.getRightMotor(), speed.neg(), RotateAmount.rotations(-0.15F - 0.5F));
+        robot.rotateSingleMotor(robot.getRightMotor(), speed.negate(), RotateAmount.rotations(-0.15F - 0.5F));
     };
     static final DanceMove MOVE_ARMS = (robot, speed) -> {
         robot.rotateSingleMotor(robot.getArmsMotor(),speed,RotateAmount.rotations(4));

@@ -27,18 +27,17 @@ import java.util.concurrent.TimeoutException;
  * Represents the robot.
  * All the low-level code like accessing the hardware and basic movement is here.
  */
-class Robot {
+public class Robot {
     static final boolean USE_INIT_ASYNC = false;
     private static final Logger LOGGER = LoggerFactory.getLogger(Robot.class);
-    private final Sound sound = Sound.getInstance();
     private RegulatedMotor leftMotor;
     private RegulatedMotor rightMotor;
     private RegulatedMotor armsMotor;
     private Touch leftSensor;
     private Touch rightSensor;
     private GraphicsLCD lcd;
+    private Sound sound = Sound.getInstance();
     private Buttons buttons;
-    @SuppressWarnings("FieldMayBeFinal")
     private Espeak espeak = new Espeak();
     private boolean isInitiallyCalibrated = false; // Wird beim ersten Kalibrieren auf true gesetzt
     private int leftCalibratedAngle; // In diesem Winkel ist der linke Fuß kalibriert. Kann unnötiges Kalibrieren vermeiden
@@ -105,6 +104,7 @@ class Robot {
                     return new EV3TouchSensor(SensorPort.S1);
                 });
         CompletableFuture<GraphicsLCD> lcdFuture = CompletableFuture.supplyAsync(LCD::getInstance);
+        CompletableFuture<Sound> soundFuture = CompletableFuture.supplyAsync(Sound::getInstance);
         try {
             leftMotor = leftFuture.get(1, TimeUnit.MINUTES);
             rightMotor = rightFuture.get(1, TimeUnit.MINUTES);
@@ -118,6 +118,8 @@ class Robot {
             if (doImmediateCalibration) calibrate(true);
         });
         lcd = lcdFuture.get();
+        sound = soundFuture.get();
+        espeak = new Espeak();
         calibrateFuture.get(); // Warten, bis das Kalibrieren abgeschlossen ist
     }
 
@@ -141,6 +143,8 @@ class Robot {
             rightSensor = new EV3TouchSensor(SensorPort.S1);
         }
         lcd = LCD.getInstance();
+        sound = Sound.getInstance();
+        espeak = new Espeak();
         buttons = new Buttons();
         if (doImmediateCalibration) {
             calibrate(true);
@@ -178,7 +182,6 @@ class Robot {
      *
      * @param s The speed to move at
      */
-    @SuppressWarnings("unused")
     void forward(Speed s) {
         leftMotor.setSpeed(s.getJavaSpeed());
         rightMotor.setSpeed(s.getJavaSpeed());
@@ -191,7 +194,6 @@ class Robot {
      *
      * @param s The speed to move at
      */
-    @SuppressWarnings("unused")
     void backward(Speed s) {
         leftMotor.setSpeed(s.getJavaSpeed());
         rightMotor.setSpeed(s.getJavaSpeed());
@@ -207,14 +209,14 @@ class Robot {
         rightMotor.stop();
     }
 
-    /**
-     * Moves the robot a fixed amount of steps.
-     *
-     * @param speed     The speed to move at
-     * @param steps How much to move by
-     */
-    void move(Speed speed, int steps) {
-        move(speed, steps, false);
+    public void rotateSingleMotor(RegulatedMotor motor, Speed speed, RotateAmount amount, boolean immediateReturn) {
+        int degrees = amount.getDegrees() * speed.signum();
+        motor.setSpeed(speed.getJavaSpeed());
+        motor.rotate(degrees, immediateReturn);
+    }
+
+    public void rotateSingleMotor(RegulatedMotor motor, Speed speed, RotateAmount amount) {
+        rotateSingleMotor(motor, speed, amount, false);
     }
 
     /**
@@ -224,11 +226,20 @@ class Robot {
      * @param steps           How much to move by
      * @param immediateReturn Iff true, method returns immediately
      */
-    @SuppressWarnings("SameParameterValue")
     void move(Speed speed, int steps, boolean immediateReturn) {
         RotateAmount amount = RotateAmount.rotations((float) steps / 2);
         rotateSingleMotor(leftMotor, speed, amount, true);
         rotateSingleMotor(rightMotor, speed, amount, immediateReturn);
+    }
+
+    /**
+     * Moves the robot a fixed amount of steps.
+     *
+     * @param speed The speed to move at
+     * @param steps How much to move by
+     */
+    void move(Speed speed, int steps) {
+        move(speed, steps, false);
     }
 
     /**
@@ -237,41 +248,23 @@ class Robot {
      * @param turningSpeed How fast the <b>robot</b> turns (not the motors)
      * @param amount       How much to turn by, counted clockwise
      */
-    @SuppressWarnings("SameParameterValue")
     void turn(Speed turningSpeed, RotateAmount amount) {
         // Die Motoren müssen sich um degrees * rotationFactor Grad drehen, damit sich der Roboter um degrees dreht
         // Herausgefunden durch Trial-and-Error
         int rotationFactor = 45;
-        RotateAmount actualAmount = amount.mult(rotationFactor);
-        calibrate();
         Speed actualSpeed = turningSpeed.mult(rotationFactor);
-        leftMotor.setSpeed(actualSpeed.getJavaSpeed());
-        rightMotor.setSpeed(actualSpeed.getJavaSpeed());
+        RotateAmount actualAmount = amount.mult(rotationFactor);
         if (amount.isPositive()) {
             rotateSingleMotor(leftMotor, actualSpeed, RotateAmount.degrees(36));
             rotateSingleMotor(rightMotor, actualSpeed, actualAmount);
             rotateSingleMotor(leftMotor, actualSpeed, RotateAmount.degrees(-36));
         } else {
             rotateSingleMotor(leftMotor, actualSpeed, RotateAmount.degrees(-180)); // Reverse 180° from calibrate()
-            rotateSingleMotor(rightMotor, actualSpeed, RotateAmount.degrees(36 + 180));
+            rotateSingleMotor(rightMotor, actualSpeed, RotateAmount.degrees(180 + 36));
             rotateSingleMotor(leftMotor, actualSpeed, actualAmount);
             rotateSingleMotor(leftMotor, actualSpeed, RotateAmount.degrees(180)); // Revert everything from before
-            rotateSingleMotor(rightMotor, actualSpeed, RotateAmount.degrees(-36 - 180));
+            rotateSingleMotor(rightMotor, actualSpeed, RotateAmount.degrees(-180 - 36));
         }
-    }
-
-    public void rotateSingleMotor(RegulatedMotor motor, Speed speed, RotateAmount amount) {
-        rotateSingleMotor(motor, speed, amount, false);
-    }
-
-    public void rotateSingleMotor(RegulatedMotor motor, Speed speed, RotateAmount amount, boolean immediateReturn) {
-        int degrees = amount.getDegrees() * speed.signum();
-        motor.setSpeed(speed.getJavaSpeed());
-        motor.rotate(degrees, immediateReturn);
-    }
-
-    public GraphicsLCD getLcd() {
-        return lcd;
     }
 
     public RegulatedMotor getRightMotor() {
@@ -290,6 +283,10 @@ class Robot {
         return buttons;
     }
 
+    public GraphicsLCD getLcd() {
+        return lcd;
+    }
+
     /**
      * Draws an image on the screen.
      * Equivalent to {@code getLcd().drawImage(...);
@@ -301,7 +298,6 @@ class Robot {
      * @param anchor Location of the anchor point
      * @see GraphicsLCD#drawImage(Image, int, int, int)
      */
-    @SuppressWarnings("SameParameterValue")
     void drawImageAndRefresh(Image src, int x, int y, int anchor) {
         lcd.drawImage(src, x, y, anchor);
         lcd.refresh();
@@ -313,7 +309,6 @@ class Robot {
      * @param message The message
      * @see Espeak
      */
-    @SuppressWarnings("SameParameterValue")
     void say(String message) {
         espeak.setMessage(message);
         espeak.say();
@@ -334,9 +329,8 @@ class Robot {
      * <em>WARNING! Not protected against code injections through </em>{@code path}!
      *
      * @param path The path to the audio file
-     * @return A CompletableFuture playing the file. May be discarded without interrupting the song.
+     * @return A CompletableFuture for further manipulation.
      */
-    @SuppressWarnings("SameParameterValue")
     CompletableFuture<Void> startPlayingFile(String path) {
         return CompletableFuture.runAsync(() -> playFile(path));
     }

@@ -151,7 +151,7 @@ public class Main {
         }
         robot.move(baseSpeed, 7);
         robot.say("Hello");
-        robot.move(baseSpeed.neg(), 7);
+        robot.move(baseSpeed.negate(), 7);
         robot.turn(baseSpeed, RotateAmount.degrees(-90));
         robot.startPlayingFile("song.wav").whenComplete((v, e) -> {
             if ((e) != null) {

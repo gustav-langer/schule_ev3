@@ -68,7 +68,7 @@ class Speed {
      * @return A new {@link Speed} with the same absolute value as this one but a reversed direction.
      * Equivalent to {@code mult(-1);}
      */
-    Speed neg() {
+    Speed negate() {
         return mult(-1);
     }
 }
