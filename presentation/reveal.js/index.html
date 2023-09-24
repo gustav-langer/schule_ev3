@@ -45,108 +45,122 @@
             </ol>
         </section>
         <section>
-            <section data-auto-animate>
-                <h2>Hardware</h2>
-                <ul>
-                    <li>3 Motoren: Linkes Bein, rechtes Bein, Arme</li>
-                </ul>
-                <img src=""> <!-- Hier ein Bild vom Roboter -->
-            </section>
-            <section data-auto-animate>
-                <h2>Hardware</h2>
-                <ul>
-                    <li>3 Motoren: Linkes Bein, rechtes Bein, Arme</li>
-                    <li>2 Sensoren an den Beinen</li>
-                </ul>
-                <img src=""> <!-- Hier ein Bild vom Roboter -->
-            </section>
-        </section>
-        <section data-auto-animate data-auto-animate-restart>
-            <h1 class="r-fit-text">Software</h1>
+            <h2>Hardware</h2>
+            <ul>
+                <li>3 Motoren: Linkes Bein, rechtes Bein, Arme</li>
+                <li>2 Sensoren an den Beinen</li>
+            </ul>
+            <img src=""> <!-- TODO Hier ein Bild vom Roboter -->
         </section>
         <section data-auto-animate>
             <h1>Software</h1>
-            <pre><code data-trim data-line-numbers data-ln-start-from="39">
-                            public class Main {
-                                public static void main(String[] args) {
-                                    Robot robot = new Robot();
-                                    /* ... */
-                                }
-
-                                /* ... */
-                            }
+            <h2 class="r-fit-text">Roboter</h2>
+        </section>
+        <section data-auto-animate>
+            <h2>Roboter</h2>
+            <pre><code data-trim data-line-numbers>
+                public class Main {
+                    public static void main(String[] args) {
+                        Robot robot = new Robot();
+                    }
+                }
             </code></pre>
         </section>
         <section>
             <section data-auto-animate>
-                <h1>Software</h1>
-                <h2 class="r-fit-text">Roboter</h2>
-            </section>
-            <section data-auto-animate>
                 <h2>Roboter</h2>
                 <!-- Falls noch Sachen wie Espeak wegfallen, hier auch ändern! -->
-                <pre><code data-trim data-line-numbers="1|2-4|5-6|7-10|13-15|18-20|22-23|25-28|29-30|32-35|36-38"
-                           data-ln-start-from="30">
-                    public class Robot {
-                        private RegulatedMotor leftMotor;
-                        private RegulatedMotor rightMotor;
-                        private RegulatedMotor armsMotor;
-                        private Touch leftSensor;
-                        private Touch rightSensor;
-                        private GraphicsLCD lcd;
-                        private Sound sound;
-                        private Buttons buttons;
-                        private Espeak espeak;
-                        /* ... */
+                <pre><code data-trim data-line-numbers="2-10|13-15|17-29|22-23">
+                public class Robot {
+                    private RegulatedMotor leftMotor;
+                    private RegulatedMotor rightMotor;
+                    private RegulatedMotor armsMotor;
+                    private Touch leftSensor;
+                    private Touch rightSensor;
+                    private GraphicsLCD lcd;
+                    private Sound sound;
+                    private Buttons buttons;
+                    private Espeak espeak;
+                    /* ... */
 
-                        Robot(boolean doImmediateCalibration) {
-                            init(doImmediateCalibration);
-                        }
-
-                        private void init(boolean doImmediateCalibration) {
-                            leftMotor = new NXTRegulatedMotor(MotorPort.C);
-                            rightMotor = new NXTRegulatedMotor(MotorPort.B);
-                            armsMotor = new NXTRegulatedMotor(MotorPort.A);
-                            try {
-                                leftSensor = new EV3TouchSensor(SensorPort.S2);
-                                rightSensor = new EV3TouchSensor(SensorPort.S1);
-                            } catch (RuntimeException e) {
-                                Sysfs.writeString("/sys/class/lego-port/port0/set_
-                    device", "lego-nxt-touch");
-                                Sysfs.writeString("/sys/class/lego-port/port1/set_
-                    device", "lego-nxt-touch");
-                                leftSensor = new EV3TouchSensor(SensorPort.S2);
-                                rightSensor = new EV3TouchSensor(SensorPort.S1);
-                            }
-                            lcd = LCD.getInstance();
-                            sound = Sound.getInstance();
-                            espeak = new Espeak();
-                            buttons = new Buttons();
-                            if (doImmediateCalibration) {
-                                calibrate(true);
-                            }
-                        }
-                        /* ... */
+                    Robot() {
+                        init();
                     }
+
+                    private void init() {
+                        leftMotor = new NXTRegulatedMotor(MotorPort.C);
+                        rightMotor = new NXTRegulatedMotor(MotorPort.B);
+                        armsMotor = new NXTRegulatedMotor(MotorPort.A);
+
+                        leftSensor = new EV3TouchSensor(SensorPort.S2);
+                        rightSensor = new EV3TouchSensor(SensorPort.S1);
+
+                        lcd = LCD.getInstance();
+                        sound = Sound.getInstance();
+                        espeak = new Espeak();
+                        buttons = new Buttons();
+                    }
+                    /* ... */
+                }
                 </code></pre>
                 <aside class="notes">
-                    Motoren - Sensoren - Anderes - Konstruktor - Init:<br/>
-                    Motoren - Sensoren - Sysfs - Anderes - Kalibrieren
+                    Variablen - Konstruktor - Init <br/>
+                    Problem: Sensor
                 </aside>
             </section>
             <section data-auto-animate>
                 <h2>Roboter</h2>
-                <div class="r-stack">
-                    <pre class="fragment fade-out" data-fragment-index="0"><code data-trim data-line-numbers
-                                                                                 data-ln-start-from="30">
-                        public class Robot {
-                            private boolean isInitiallyCalibrated = false;
-                            private int leftCalibratedAngle;
-                            private int rightCalibratedAngle;
-                            /* ... */
-                        }
-                    </code></pre>
-                    <pre class="fragment" data-fragment-index="0" style="width: 102%"><code data-trim
+                <pre><code data-trim data-line-numbers="6-9|10-11"
+                           data-ln-start-from="20">
+                    /* ... */
+                    try {
+                        leftSensor = new EV3TouchSensor(SensorPort.S2);
+                        rightSensor = new EV3TouchSensor(SensorPort.S1);
+                    } catch (RuntimeException e) {
+                        Sysfs.writeString("/sys/class/lego-port/port0/set_device",
+                    "lego-nxt-touch");
+                        Sysfs.writeString("/sys/class/lego-port/port1/set_device",
+                    "lego-nxt-touch");
+                        leftSensor = new EV3TouchSensor(SensorPort.S2);
+                        rightSensor = new EV3TouchSensor(SensorPort.S1);
+                    }
+                    /* ... */
+                </code></pre>
+                <aside class="notes">
+                    Sysfs - nochmal versuchen
+                </aside>
+            </section>
+            <section data-auto-animate>
+                <h2>Roboter</h2>
+                <h3>Kalibrieren</h3>
+                <ol>
+                    <li>Einen Motor drehen</li>
+                    <li>Warten, bis der Sensor gedrückt ist, dann aufhören</li>
+                    <li>Das Gleiche für den anderen Motor</li>
+                    <li>Einen Motor um 180° versetzen</li>
+                </ol>
+            </section>
+            <section data-auto-animate>
+                <h2>Roboter</h2>
+                <h3>Kalibrieren</h3>
+                <!-- TODO falls sich das kalibrieren noch ändert, hier auch ändern -->
+                <pre style="width: 100%"><code data-trim data-line-numbers="2|2,8-10|2,11|2,12|3|4">
+                    void calibrate() {
+                        calibrateSingleMotor(leftMotor, leftSensor);
+                        calibrateSingleMotor(rightMotor, rightSensor);
+                        leftMotor.rotate(180);
+                    }
+
+                    private void calibrateSingleMotor(RegulatedMotor motor, Touch sensor) {
+                        int calibrateSpeed = 270;
+                        motor.setSpeed(calibrateSpeed);
+                        motor.forward();
+                        while (!sensor.isPressed()) Delay.msDelay(5);
+                        motor.stop();
+                    }
+                </code></pre>
+                <!--<div class="r-stack">
+                    <pre class="fragment fade-out" data-fragment-index="0" style="width: 102%"><code data-trim
                                                                                             data-line-numbers="1|2-4|5-6|14|16|17|18-20|7|8-10"
                                                                                             data-ln-start-from="158">
                         void calibrate(boolean forceCalibrate) {
@@ -171,13 +185,27 @@
                             motor.stop();
                         }
                     </code></pre>
+                    <pre class="fragment" data-fragment-index="0"><code data-trim data-line-numbers
+                                                                                 data-ln-start-from="30">
+                        public class Robot {
+                            private boolean isInitiallyCalibrated = false;
+                            private int leftCalibratedAngle;
+                            private int rightCalibratedAngle;
+                            /* ... */
+                        }
+                    </code></pre>
                     <aside class="notes">
                         Variablen - calibrate():<br/><br/>
                         Bedingung - calibrateSingleMotor:<br/><br/>
                         Geschwindigkeit setzen - if pressed rotate 180 - vorwärts, drehen, stoppen<br/><br/>
                         Links 1/2 drehen - Variablen setzen
                     </aside>
-                </div>
+                </div>-->
+                <aside class="notes">
+                    Linker Motor:<br/>
+                    Drehen - auf Sensor warten - Stoppen<br/>
+                    Rechter Motor - Links 180°
+                </aside>
             </section>
         </section>
         <section>
@@ -235,7 +263,8 @@
             </section>
             <section data-auto-animate>
                 <h2>Roboter</h2>
-                <pre><code data-trim data-line-numbers="1|2|4-6|8-10|12-14|16-18|20-22|24-26|28-30|32-34" data-ln-start-from="1">
+                <pre><code data-trim data-line-numbers="1|2|4-6|8-10|12-14|16-18|20-22|24-26|28-30|32-34"
+                           data-ln-start-from="1">
                     public class RotateAmount {
                         private final int degrees;
 
@@ -412,6 +441,7 @@
             }
         }
     });
+
 
 
 
