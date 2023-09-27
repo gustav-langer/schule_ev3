@@ -171,10 +171,18 @@ public class Robot {
     private void calibrateSingleMotor(RegulatedMotor motor, Touch sensor) {
         int calibrateSpeed = 270;
         motor.setSpeed(calibrateSpeed);
-        if (sensor.isPressed()) motor.rotate(180);
+        if (sensor.isPressed()) {
+            beep();
+            motor.rotate(180);
+            Delay.msDelay(1000);
+        }
+        beep();
         motor.forward();
-        while (!sensor.isPressed()) Delay.msDelay(5);
+        while (!sensor.isPressed()) {Delay.usDelay(50);}
         motor.stop();
+        Delay.msDelay(1000);
+        beep();beep();
+        Delay.msDelay(1000);
     }
 
     /**
@@ -206,7 +214,8 @@ public class Robot {
      */
     void stop() {
         leftMotor.stop(true);
-        rightMotor.stop();
+        rightMotor.stop(true);
+        armsMotor.stop();
     }
 
     public void rotateSingleMotor(RegulatedMotor motor, Speed speed, RotateAmount amount, boolean immediateReturn) {
@@ -217,6 +226,23 @@ public class Robot {
 
     public void rotateSingleMotor(RegulatedMotor motor, Speed speed, RotateAmount amount) {
         rotateSingleMotor(motor, speed, amount, false);
+    }
+
+    public void rotateLeftMotor(Speed speed, RotateAmount amount) {
+        rotateSingleMotor(leftMotor, speed, amount);
+    }
+
+    public void rotateRightMotor(Speed speed, RotateAmount amount) {
+        rotateSingleMotor(rightMotor, speed, amount);
+    }
+
+    public void startArms(Speed speed) {
+        armsMotor.setSpeed(speed.getJavaSpeed());
+        armsMotor.forward();
+    }
+
+    public void stopArms() {
+        armsMotor.stop();
     }
 
     /**

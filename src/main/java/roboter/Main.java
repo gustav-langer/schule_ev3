@@ -25,10 +25,10 @@ Ideen:
  */
 
 /*
-* Erst nur ein Bein bewegen, dann nur das andere
-* Dann die Arme bewegen
-* 0:19 2 Schritte nach vorne, 2 zurück
-*/
+ * Erst nur ein Bein bewegen, dann nur das andere
+ * Dann die Arme bewegen
+ * 0:19 2 Schritte nach vorne, 2 zurück
+ */
 
 //todo: Annotations hinkriegen
 
@@ -39,6 +39,25 @@ Ideen:
 public class Main {
     private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
+    /**
+     * nicht in die präsentation!
+     */
+    private static KeyListener onKeyPressed(Runnable run) {
+        return new KeyListener() {
+            @Override
+            public void keyPressed(Key key) {
+                run.run();
+            }
+
+            @Override
+            public void keyReleased(Key key) {
+            }
+        };
+    }
+
+    /**
+     * (noch) nicht in die präsentation
+     */
     public static void main(String[] args) {
         String action = "dance";
         Robot robot = new Robot(true);
@@ -46,24 +65,19 @@ public class Main {
         LOGGER.info("Roboter erzeugt!");
         while (true) {
             robot.beep();
-            Button.UP.addKeyListener(new KeyListener() {
-                @Override
-                public void keyPressed(Key k) {
-                    robot.calibrate();
-                }
-                @Override
-                public void keyReleased(Key k) {}
-            });
+            Button.UP.addKeyListener(onKeyPressed(robot::calibrate));
+            Button.DOWN.addKeyListener(onKeyPressed(() -> {
+                robot.getLeftMotor().rotate(30);
+                robot.getRightMotor().rotate(-40);
+            }));
             Button.ENTER.waitForPressAndRelease();
             switch (action) {
                 case "dance":
-                    dance(robot,132);
+                    dance(robot, 128);
                     break;
                 case "demo":
                     demo(robot);
                     break;
-                case "manualControl":
-                    manualControl(robot);
             }
         }
     }
@@ -71,11 +85,9 @@ public class Main {
     @SuppressWarnings("SameParameterValue")
     static void dance(Robot robot, int bpm) {
         List<DanceMove> dance = List.of(
-                WAIT_ONE_MEASURE,WAIT_ONE_MEASURE,WAIT_ONE_MEASURE,WAIT_ONE_MEASURE,
-                MOVE_LEFT_MOTOR,
-                MOVE_RIGHT_MOTOR,
+                WAIT_ONE_MEASURE,WAIT_ONE_MEASURE,
                 FOUR_STEPS
-                );
+        );
         runDance(robot, dance, "song.wav", bpm, Duration.ofSeconds(2 * 60 + 18)); //Song length: 2 minutes 18
         robot.stopAudio();
     }
@@ -143,16 +155,17 @@ public class Main {
 
     @SuppressWarnings("unused")
     static void demo(Robot robot) {
-        Speed baseSpeed = Speed.ev3Speed(45);
+        Speed speed = Speed.ev3Speed(45);
         try {
             robot.drawImageAndRefresh(JarResource.loadImage("ev3_logo.png"), 35, 10, 0);
         } catch (IOException e) {
             LOGGER.info("Couldn't load image");
         }
-        robot.move(baseSpeed, 7);
+        robot.move(speed, 7);
         robot.say("Hello");
-        robot.move(baseSpeed.negate(), 7);
-        robot.turn(baseSpeed, RotateAmount.degrees(-90));
+        robot.rotateSingleMotor(robot.getArmsMotor(), speed, RotateAmount.rotations(7), true);
+        robot.move(speed.negate(), 7);
+        robot.turn(speed, RotateAmount.degrees(-90));
         robot.startPlayingFile("song.wav").whenComplete((v, e) -> {
             if ((e) != null) {
                 throw new RuntimeException(e);
@@ -163,6 +176,13 @@ public class Main {
         robot.stopAudio();
         LOGGER.info("stopped");
     }
+
+    /*static void getMotorSpeed(Robot robot) {
+        var m = robot.getArmsMotor();
+        m.setSpeed(100);
+        m.resetTachoCount();
+        var t = Delay
+    }*/
 
     static void manualControl(Robot robot) {
         robot.getLeftMotor().setSpeed(30 * 6);
@@ -237,6 +257,6 @@ public class Main {
 /*
  Keep 'Em Coming - Jules Gaia
  https://youtu.be/3bd1pJEZjvE
- BPM ~ 120
+ BPM: 128
  Length = 2:18,75
 */

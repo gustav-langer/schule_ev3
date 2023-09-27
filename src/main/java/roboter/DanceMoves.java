@@ -19,25 +19,33 @@ class DanceMoves {
     static final DanceMove WAIT_ONE_BEAT = (robot, speed) -> Delay.msDelay(Main.msPerBeat(speed));
 
     static final DanceMove WAIT_ONE_MEASURE = (robot, speed) -> Delay.msDelay(Main.msPerBeat(speed) * 4L);
-
-    static final DanceMove FOUR_STEPS = (robot, speed) -> {
-        robot.rotateSingleMotor(robot.getArmsMotor(), speed.mult(1), RotateAmount.rotations(2), true);
+    static final DanceMove FOUR_STEPS_OLD = (robot, speed) -> {
+        robot.rotateSingleMotor(robot.getArmsMotor(), speed, RotateAmount.rotations(2), true);
         robot.move(speed.mult(2), 4);
         robot.move(speed.mult(2), -4);
     };
-
+    static final DanceMove ONE_STEP = steps(1);
+    static final DanceMove FOUR_STEPS = steps(4);
     static final DanceMove MOVE_RIGHT_MOTOR = (robot, speed) -> {
-        robot.rotateSingleMotor(robot.getLeftMotor(),speed,RotateAmount.rotations(-0.15F-0.5F));
-        robot.rotateSingleMotor(robot.getRightMotor(),speed.mult(2),RotateAmount.rotations(8-0.6F));
-        robot.rotateSingleMotor(robot.getLeftMotor(),speed.negate(),RotateAmount.rotations(-0.15F-0.5F));
+        robot.rotateSingleMotor(robot.getLeftMotor(), speed, RotateAmount.rotations(-0.15F - 0.5F));
+        robot.rotateSingleMotor(robot.getRightMotor(), speed.mult(2), RotateAmount.rotations(8 - 0.6F));
+        robot.rotateSingleMotor(robot.getLeftMotor(), speed.negate(), RotateAmount.rotations(-0.15F - 0.5F));
     };
-
     static final DanceMove MOVE_LEFT_MOTOR = (robot, speed) -> {
         robot.rotateSingleMotor(robot.getRightMotor(), speed, RotateAmount.rotations(-0.15F - 0.5F));
         robot.rotateSingleMotor(robot.getLeftMotor(), speed.mult(2), RotateAmount.rotations(8 - 0.6F));
         robot.rotateSingleMotor(robot.getRightMotor(), speed.negate(), RotateAmount.rotations(-0.15F - 0.5F));
     };
     static final DanceMove MOVE_ARMS = (robot, speed) -> {
-        robot.rotateSingleMotor(robot.getArmsMotor(),speed,RotateAmount.rotations(4));
+        robot.rotateSingleMotor(robot.getArmsMotor(), speed, RotateAmount.rotations(4));
     };
+
+    static DanceMove steps(int count) {
+        return (robot, speed) -> {
+            robot.startArms(speed);
+            robot.move(speed.mult(2), count);
+            robot.move(speed.mult(2), count * -1);
+            robot.stopArms();
+        };
+    }
 }
