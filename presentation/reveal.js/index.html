@@ -96,7 +96,46 @@
 					</section>
 				</section>
 				<section>Ide</section>
-				<section>problem, lösung</section>
+				<section>
+					<section>
+						<h2>Programmierung</h2>
+						<ul>
+							<li>Beide Motoren gleichzeitig bewegen, um zu laufen</li>
+							<li>Müssen dafür aber genau um 180° versetzt sind</li>
+							<li>Sensoren können die Position finden</li>
+						</ul>
+					</section>
+					<section>
+						<pre class="mermaid">
+							flowchart TD
+								subgraph singleMotor[ ]
+								kalibrieren{{Motor kalibrieren}} --> motorDrehen(Motor drehen)
+								motorDrehen --> sensor?{Sensor gedrückt?}
+								sensor? -->|Ja| motorStopp(Motor stoppen)
+								sensor? -->|Nein| warte[kurz warten]
+								warte --> sensor?
+								motorStopp --> sStopp{{Stopp}}
+								end
+
+								subgraph main[ ]
+								start{{Start}} --> links[[Linken Motor \n kalibrieren]]
+								links --> rechts[[Rechten Motor kalibrieren]]
+								rechts --> links180(Linken Motor 180° drehen)
+								links180 --> mStopp{{Stopp}}
+								end
+						</pre>
+					</section>
+					<section>
+						<h2>Programmierung</h2>
+						Der Roboter kann jetzt:
+						<ul>
+							<li>Vorwärts, rückwärts laufen</li>
+							<li>Arme bewegen</li>
+							<li>Beine einzeln bewegen</li>
+							<li>Ton abspielen</li>
+						</ul>
+					</section>
+				</section>
 				<section>tanz</section>
 				<section>reveal</section>
 			</div>
@@ -106,6 +145,7 @@
 		<script src="plugin/notes/notes.js"></script>
 		<script src="plugin/markdown/markdown.js"></script>
 		<script src="plugin/highlight/highlight.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/mermaid@10.5.0/dist/mermaid.min.js"></script>
 		<script>
 			// More info about initialization & config:
 			// - https://revealjs.com/initialization/
@@ -115,7 +155,9 @@
 
 				// Learn about plugins: https://revealjs.com/plugins/
 				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
-			});
+			}).then( ()=> mermaid.initialize({theme:"dark"}) );
+
+			// mermaid.initialize({theme:"dark"});
 		</script>
 	</body>
 </html>
