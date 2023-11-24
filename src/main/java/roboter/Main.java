@@ -82,7 +82,6 @@ public class Main {
         }
     }
 
-    @SuppressWarnings("SameParameterValue")
     static void dance(Robot robot, int bpm) {
         List<DanceMove> dance = List.of(
                 WAIT_ONE_MEASURE,WAIT_ONE_MEASURE,
@@ -101,7 +100,6 @@ public class Main {
      * @param bpm               The BPM of the song
      * @param ignoredSongLength The length of the song, as a {@link Duration}
      */
-    @SuppressWarnings("SameParameterValue")
     static void runDance(Robot robot, List<DanceMove> dance, String songFileName, int bpm, Duration ignoredSongLength) {
         Speed baseSpeed = Speed.ev3Speed(bpm / 4); // Base speed is one rotation per measure
         robot.startPlayingFile(songFileName);
@@ -153,7 +151,6 @@ public class Main {
         return 15000 / speed.getEv3Speed(); //60 seconds/minute * 1000 ms/second : 4 beats/measure = 15000
     }
 
-    @SuppressWarnings("unused")
     static void demo(Robot robot) {
         Speed speed = Speed.ev3Speed(45);
         try {
