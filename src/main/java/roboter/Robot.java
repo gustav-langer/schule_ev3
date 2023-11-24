@@ -169,20 +169,23 @@ public class Robot {
     }
 
     private void calibrateSingleMotor(RegulatedMotor motor, Touch sensor) {
-        int calibrateSpeed = 270;
+        int calibrateSpeed = 140; // TODO was originally 270
         motor.setSpeed(calibrateSpeed);
         if (sensor.isPressed()) {
-            beep();
+            //beep();
             motor.rotate(180);
-            Delay.msDelay(1000);
+            //Delay.msDelay(1000);
         }
-        beep();
+        //beep();
         motor.forward();
-        while (!sensor.isPressed()) {Delay.usDelay(50);}
+        while (!sensor.isPressed()) {
+            Delay.msDelay(50);
+        }
         motor.stop();
-        Delay.msDelay(1000);
-        beep();beep();
-        Delay.msDelay(1000);
+        //Delay.msDelay(1000);
+        //beep();
+        //beep();
+        //Delay.msDelay(1000);
     }
 
     /**
@@ -234,6 +237,10 @@ public class Robot {
 
     public void rotateRightMotor(Speed speed, RotateAmount amount) {
         rotateSingleMotor(rightMotor, speed, amount);
+    }
+
+    public void rotateArmsMotor(Speed speed, RotateAmount amount) {
+        rotateSingleMotor(armsMotor, speed, amount);
     }
 
     public void startArms(Speed speed) {
