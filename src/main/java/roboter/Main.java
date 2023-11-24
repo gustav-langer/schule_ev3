@@ -59,26 +59,19 @@ public class Main {
      * (noch) nicht in die präsentation
      */
     public static void main(String[] args) {
-        String action = "dance";
         Robot robot = new Robot(true);
         drawJavaLogo(robot);
         LOGGER.info("Roboter erzeugt!");
+        Button.UP.addKeyListener(onKeyPressed(robot::calibrate));
+        Button.DOWN.addKeyListener(onKeyPressed(() -> {
+            robot.getLeftMotor().rotate(30);
+            robot.getRightMotor().rotate(-40);
+        }));
+        Button.LEFT.addKeyListener(onKeyPressed(() -> demo(robot)));
+        robot.beep();
         while (true) {
-            robot.beep();
-            Button.UP.addKeyListener(onKeyPressed(robot::calibrate));
-            Button.DOWN.addKeyListener(onKeyPressed(() -> {
-                robot.getLeftMotor().rotate(30);
-                robot.getRightMotor().rotate(-40);
-            }));
             Button.ENTER.waitForPressAndRelease();
-            switch (action) {
-                case "dance":
-                    dance(robot, 128);
-                    break;
-                case "demo":
-                    demo(robot);
-                    break;
-            }
+            dance(robot, 80); // TODO was: 128
         }
     }
 
