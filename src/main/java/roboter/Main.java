@@ -58,6 +58,7 @@ public class Main {
     /**
      * (noch) nicht in die präsentation
      */
+    @SuppressWarnings("InfiniteLoopStatement")
     public static void main(String[] args) {
         Robot robot = new Robot(true);
         drawJavaLogo(robot);
@@ -75,6 +76,7 @@ public class Main {
         }
     }
 
+    @SuppressWarnings("SameParameterValue")
     static void dance(Robot robot, int bpm) {
         List<DanceMove> dance = List.of(
                 SINGLE_FORWARD_STEP_4,
@@ -101,6 +103,7 @@ public class Main {
      * @param bpm               The BPM of the song
      * @param ignoredSongLength The length of the song, as a {@link Duration}
      */
+    @SuppressWarnings("SameParameterValue")
     static void runDance(Robot robot, List<DanceMove> dance, String songFileName, int bpm, Duration ignoredSongLength) {
         Speed baseSpeed = Speed.ev3Speed(bpm / 4); // Base speed is one rotation per measure
         robot.startPlayingFile(songFileName);
