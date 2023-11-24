@@ -10,27 +10,15 @@ class DanceMoves {
     static final DanceMove WAIT_1 = (robot, speed) -> Delay.msDelay(Main.msPerBeat(speed));
     static final DanceMove WAIT_4 = (robot, speed) -> Delay.msDelay(Main.msPerBeat(speed) * 4L);
 
-    static final DanceMove SINGLE_FORWARD_STEP_2 = (robot, speed) -> {
-        robot.move(speed.mult(2), 1);
-        robot.move(speed.mult(2), -1);
-    };
-    static final DanceMove SINGLE_BACKWARD_STEP_2 = (robot, speed) -> {
-        robot.move(speed.mult(2), -1);
-        robot.move(speed.mult(2), 1);
-    };
+    static final DanceMove SINGLE_FORWARD_STEP_2 = steps(1);
+    static final DanceMove SINGLE_BACKWARD_STEP_2 = steps(-1);
 
     static final DanceMove SINGLE_FORWARD_STEP_4 = SINGLE_FORWARD_STEP_2.repeat(2);
     static final DanceMove SINGLE_BACKWARD_STEP_4 = SINGLE_BACKWARD_STEP_2.repeat(2);
 
-    static final DanceMove TWO_FORWARD_STEPS_4 = (robot, speed) -> {
-        robot.move(speed.mult(2),2);
-        robot.move(speed.mult(2),-2);
-    };
+    static final DanceMove TWO_FORWARD_STEPS_4 = steps(2);
 
-    static final DanceMove TWO_BACKWARD_STEPS_4 = (robot, speed) -> {
-        robot.move(speed.mult(2),-2);
-        robot.move(speed.mult(2),2);
-    };
+    static final DanceMove TWO_BACKWARD_STEPS_4 = steps(-2);
 
     static final DanceMove FOUR_STEPS_FORWARD_4 = (robot, speed) -> robot.move(speed.mult(2), 4);
 
