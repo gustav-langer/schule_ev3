@@ -77,8 +77,16 @@ public class Main {
 
     static void dance(Robot robot, int bpm) {
         List<DanceMove> dance = List.of(
-                WAIT_ONE_MEASURE,WAIT_ONE_MEASURE,
-                FOUR_STEPS
+                SINGLE_FORWARD_STEP_4,
+                SINGLE_BACKWARD_STEP_4,
+                FOUR_STEPS_FORWARD_4,
+                MOVE_ARMS_4,
+                TWO_BACKWARD_STEPS_4,
+                ARMS_ON_0,
+                TWO_BACKWARD_STEPS_4,
+                WAIT_4,
+                ARMS_OFF_0,
+                FOUR_STEPS_BACKWARD_4
         );
         runDance(robot, dance, "song.wav", bpm, Duration.ofSeconds(2 * 60 + 18)); //Song length: 2 minutes 18
         robot.stopAudio();
