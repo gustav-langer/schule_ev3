@@ -7,45 +7,62 @@ import lejos.utility.Delay;
  * The moves are represented as {@link DanceMove} implementations.
  */
 class DanceMoves {
-    static final DanceMove EXAMPLE1 = (robot, speed) -> {
-        robot.move(speed, 1);
-        robot.move(speed, -1);
+    static final DanceMove WAIT_1 = (robot, speed) -> Delay.msDelay(Main.msPerBeat(speed));
+    static final DanceMove WAIT_4 = (robot, speed) -> Delay.msDelay(Main.msPerBeat(speed) * 4L);
+
+    static final DanceMove SINGLE_FORWARD_STEP_2 = (robot, speed) -> {
+        robot.move(speed.mult(2), 1);
+        robot.move(speed.mult(2), -1);
     };
-    static final DanceMove EXAMPLE2 = (robot, speed) -> {
-        robot.turn(speed, RotateAmount.degrees(90));
-        robot.turn(speed.mult(3), RotateAmount.degrees(270));
+    static final DanceMove SINGLE_BACKWARD_STEP_2 = (robot, speed) -> {
+        robot.move(speed.mult(2), -1);
+        robot.move(speed.mult(2), 1);
     };
 
-    static final DanceMove WAIT_ONE_BEAT = (robot, speed) -> Delay.msDelay(Main.msPerBeat(speed));
+    static final DanceMove SINGLE_FORWARD_STEP_4 = SINGLE_FORWARD_STEP_2.repeat(2);
+    static final DanceMove SINGLE_BACKWARD_STEP_4 = SINGLE_BACKWARD_STEP_2.repeat(2);
 
-    static final DanceMove WAIT_ONE_MEASURE = (robot, speed) -> Delay.msDelay(Main.msPerBeat(speed) * 4L);
-    static final DanceMove FOUR_STEPS_OLD = (robot, speed) -> {
-        robot.rotateSingleMotor(robot.getArmsMotor(), speed, RotateAmount.rotations(2), true);
-        robot.move(speed.mult(2), 4);
-        robot.move(speed.mult(2), -4);
+    static final DanceMove TWO_FORWARD_STEPS_4 = (robot, speed) -> {
+        robot.move(speed.mult(2),2);
+        robot.move(speed.mult(2),-2);
     };
-    static final DanceMove ONE_STEP = steps(1);
-    static final DanceMove FOUR_STEPS = steps(4);
-    static final DanceMove MOVE_RIGHT_MOTOR = (robot, speed) -> {
+
+    static final DanceMove TWO_BACKWARD_STEPS_4 = (robot, speed) -> {
+        robot.move(speed.mult(2),-2);
+        robot.move(speed.mult(2),2);
+    };
+
+    static final DanceMove FOUR_STEPS_FORWARD_4 = (robot, speed) -> robot.move(speed.mult(2), 4);
+
+    static final DanceMove FOUR_STEPS_BACKWARD_4 = (robot, speed) -> robot.move(speed.mult(2), -4);
+
+    static final DanceMove MOVE_ARMS_4 = (robot, speed) ->
+            robot.rotateArmsMotor(speed.mult(2), RotateAmount.rotations(2));
+
+    static final DanceMove MOVE_ARMS_ALT_4 = (robot, speed) ->
+            robot.rotateArmsMotor(speed.mult(2), RotateAmount.rotations(-2));
+
+    static final DanceMove ARMS_ON_0 = (robot, speed) -> robot.startArms(speed.mult(2));
+
+    static final DanceMove ARMS_OFF_0 = (robot, speed) -> robot.stopArms();
+    static final DanceMove MOVE_RIGHT_MOTOR_20 = (robot, speed) -> {
         robot.rotateSingleMotor(robot.getLeftMotor(), speed, RotateAmount.rotations(-0.15F - 0.5F));
         robot.rotateSingleMotor(robot.getRightMotor(), speed.mult(2), RotateAmount.rotations(8 - 0.6F));
         robot.rotateSingleMotor(robot.getLeftMotor(), speed.negate(), RotateAmount.rotations(-0.15F - 0.5F));
     };
-    static final DanceMove MOVE_LEFT_MOTOR = (robot, speed) -> {
+    static final DanceMove MOVE_LEFT_MOTOR_20 = (robot, speed) -> {
         robot.rotateSingleMotor(robot.getRightMotor(), speed, RotateAmount.rotations(-0.15F - 0.5F));
         robot.rotateSingleMotor(robot.getLeftMotor(), speed.mult(2), RotateAmount.rotations(8 - 0.6F));
         robot.rotateSingleMotor(robot.getRightMotor(), speed.negate(), RotateAmount.rotations(-0.15F - 0.5F));
     };
-    static final DanceMove MOVE_ARMS = (robot, speed) -> {
-        robot.rotateSingleMotor(robot.getArmsMotor(), speed, RotateAmount.rotations(4));
-    };
+
+    private DanceMoves() {
+    }
 
     static DanceMove steps(int count) {
         return (robot, speed) -> {
-            robot.startArms(speed);
             robot.move(speed.mult(2), count);
             robot.move(speed.mult(2), count * -1);
-            robot.stopArms();
         };
     }
 }
