@@ -58,35 +58,37 @@ public class Main {
     /**
      * (noch) nicht in die präsentation
      */
+    @SuppressWarnings("InfiniteLoopStatement")
     public static void main(String[] args) {
-        String action = "dance";
         Robot robot = new Robot(true);
         drawJavaLogo(robot);
         LOGGER.info("Roboter erzeugt!");
+        Button.UP.addKeyListener(onKeyPressed(robot::calibrate));
+        Button.DOWN.addKeyListener(onKeyPressed(() -> {
+            robot.getLeftMotor().rotate(30);
+            robot.getRightMotor().rotate(-40);
+        }));
+        Button.LEFT.addKeyListener(onKeyPressed(() -> demo(robot)));
+        robot.beep();
         while (true) {
-            robot.beep();
-            Button.UP.addKeyListener(onKeyPressed(robot::calibrate));
-            Button.DOWN.addKeyListener(onKeyPressed(() -> {
-                robot.getLeftMotor().rotate(30);
-                robot.getRightMotor().rotate(-40);
-            }));
             Button.ENTER.waitForPressAndRelease();
-            switch (action) {
-                case "dance":
-                    dance(robot, 128);
-                    break;
-                case "demo":
-                    demo(robot);
-                    break;
-            }
+            dance(robot, 80); // TODO was: 128
         }
     }
 
     @SuppressWarnings("SameParameterValue")
     static void dance(Robot robot, int bpm) {
         List<DanceMove> dance = List.of(
-                WAIT_ONE_MEASURE,WAIT_ONE_MEASURE,
-                FOUR_STEPS
+                SINGLE_FORWARD_STEP_4,
+                SINGLE_BACKWARD_STEP_4,
+                FOUR_STEPS_FORWARD_4,
+                MOVE_ARMS_4,
+                TWO_BACKWARD_STEPS_4,
+                ARMS_ON_0,
+                TWO_BACKWARD_STEPS_4,
+                WAIT_4,
+                ARMS_OFF_0,
+                FOUR_STEPS_BACKWARD_4
         );
         runDance(robot, dance, "song.wav", bpm, Duration.ofSeconds(2 * 60 + 18)); //Song length: 2 minutes 18
         robot.stopAudio();
@@ -153,7 +155,6 @@ public class Main {
         return 15000 / speed.getEv3Speed(); //60 seconds/minute * 1000 ms/second : 4 beats/measure = 15000
     }
 
-    @SuppressWarnings("unused")
     static void demo(Robot robot) {
         Speed speed = Speed.ev3Speed(45);
         try {

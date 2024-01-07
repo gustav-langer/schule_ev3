@@ -5,7 +5,7 @@ package roboter;
  * while functions like {@link lejos.robotics.RegulatedMotor#setSpeed(int) setSpeed(int)} calculate in degrees per second.
  * This class supports both and can be used to easily convert between the units.
  */
-class Speed {
+public class Speed {
     private static final int JAVA_EV3_CONVERSION_FACTOR = 6; // (360 degrees / 1 rotation) * (1 minute / 60 seconds)
     private final int javaSpeed; //Geschwindigkeit in Grad/Sekunde
 
@@ -46,7 +46,6 @@ class Speed {
     /**
      * @return true if the stored value is greater than 0
      */
-    @SuppressWarnings("unused")
     boolean isPositive() {
         return javaSpeed > 0;
     }
@@ -59,7 +58,6 @@ class Speed {
      * @param factor The factor to multiply the speed by
      * @return A new {@link Speed} with the value of the current one multiplied by {@code factor}
      */
-    @SuppressWarnings("SameParameterValue")
     Speed mult(float factor) {
         return Speed.javaSpeed(Math.round(this.getJavaSpeed() * factor));
     }
