@@ -13,7 +13,7 @@
     <!-- Theme used for syntax highlighted code -->
     <link href="plugin/highlight/monokai.css" rel="stylesheet">
 
-    <link href="ev3.css" rel="stylesheet">
+    <!--<link href="ev3.css" rel="stylesheet">-->
 </head>
 <body>
 <div class="reveal">
@@ -24,7 +24,7 @@
         </section>
         <section>
             <h2>Inhalt</h2>
-            <ul>
+            <ul data-id="ul">
                 <li>Einleitung</li>
                 <li>Hardware</li>
                 <li>Java</li>
@@ -37,7 +37,7 @@
         </section>
         <section>
             <h2>Einleitung</h2>
-            <ul>
+            <ul data-id="ul">
                 <li>Roboter bauen</li>
                 <li>Mit Java programmieren</li>
                 <li>Tanzen</li>
@@ -49,7 +49,7 @@
             <section data-auto-animate>
                 <h2>Hardware</h2>
                 <h3>EV3-Stein</h3>
-                <ul>
+                <ul data-id="ul">
                     <li>Steuereinheit des Roboters</li>
                     <li>Kabel zu allen Motoren & Sensoren</li>
                 </ul>
@@ -58,7 +58,7 @@
             <section data-auto-animate>
                 <h2>Hardware</h2>
                 <h3>Arme</h3>
-                <ul>
+                <ul data-id="ul">
                     <li>Können nur zusammen bewegt werden</li>
                     <li>Hände öffnen und schließen</li>
                 </ul>
@@ -67,7 +67,7 @@
             <section data-auto-animate>
                 <h2>Hardware</h2>
                 <h3>Kopf</h3>
-                <ul>
+                <ul data-id="ul">
                     <li>Entfernungen erkennen</li>
                     <li>Hier nicht verwendet</li>
                 </ul>
@@ -76,7 +76,7 @@
             <section data-auto-animate>
                 <h2>Hardware</h2>
                 <h3>Beine</h3>
-                <ul>
+                <ul data-id="ul">
                     <li>Können einzeln bewegt werden</li>
                     <li>Vorwärts und rückwärts, nicht zur Seite</li>
                 </ul>
@@ -85,7 +85,7 @@
             <section data-auto-animate>
                 <h2>Hardware</h2>
                 <h3>Sensoren</h3>
-                <ul>
+                <ul data-id="ul">
                     <li>Erkennen die Position der Beine</li>
                     <li>Wenn gedrückt: geben ein Signal aus</li>
                 </ul>
@@ -95,7 +95,7 @@
         <section>
             <section data-auto-animate data-auto-animate-restart>
                 <h2>Java</h2>
-                <ul>
+                <ul data-id="ul">
                     <li>Objektorientierte Programmiersprache</li>
                     <li>Umfangreich</li>
                     <li>Ähnliche Syntax wie C/C++</li>
@@ -103,7 +103,7 @@
             </section>
             <section data-auto-animate>
                 <h2>Java</h2>
-                <ul>
+                <ul data-id="ul">
                     <li>Plattformunabhängig (JVM)</li>
                     <li>Sicherheitsmechanismen (Speicherzugriff, Mehrbenutzerbetrieb)</li>
                     <li>Weltweit und überall benutzt (Google, Nasa, etc.)</li>
@@ -113,7 +113,7 @@
         <section>
             <section data-auto-animate data-auto-animate-restart>
                 <h2>Betriebssystem</h2>
-                <ul>
+                <ul data-id="ul">
                     <li>Standardsystem kann kein Java</li>
                     <li>Es gibt verschiedene Möglichkeiten</li>
                     <li>Häufig: Firmware überschreiben</li>
@@ -122,7 +122,7 @@
             <section data-auto-animate>
                 <h2>Betriebssystem</h2>
                 <h3>ev3dev</h3>
-                <ul>
+                <ul data-id="ul">
                     <li>Einfach nur SD-Karte verwenden</li>
                     <li>Basiert auf Debian Linux</li>
                     <li>Unterstützt Java, Python und mehr</li>
@@ -134,7 +134,7 @@
         <section>
             <section data-auto-animate data-auto-animate-restart>
                 <h2>IDE</h2>
-                <ul>
+                <ul data-id="ul">
                     <li> "Integrated Development Environment" (Integrierte Entwicklungsumgebung)</li>
                     <li>Syntax,Compiler,Debugger, etc.</li>
                     <li>Erweiterbar (Plugins, Tools)</li>
@@ -147,7 +147,7 @@
             <section>
                 <h2>IDE</h2>
                 <h3>Vorteile</h3>
-                <ul>
+                <ul data-id="ul">
                     <li>Effizienz</li>
                     <li>Erweiterbarkeit</li>
                     <li>Gute Benutzeroberfläche/Durchsichtigkeit</li>
@@ -156,7 +156,7 @@
             <section>
                 <h2>IDE</h2>
                 <h3>Nachteile</h3>
-                <ul>
+                <ul data-id="ul">
                     <li>Kosten</li>
                     <li>Gewisse Abhängigkeit</li>
                     <li>Hoher Leistungs-/Speicherverbrauch</li>
@@ -166,7 +166,7 @@
         <section>
             <section>
                 <h2>Programmierung</h2>
-                <ul>
+                <ul data-id="ul">
                     <li>Beide Motoren gleichzeitig bewegen, um zu laufen</li>
                     <li>Müssen dafür aber genau um 180° versetzt sind</li>
                     <li>Sensoren können die Position finden</li>
@@ -195,7 +195,7 @@
             <section>
                 <h2>Programmierung</h2>
                 <p>Der Roboter kann jetzt:</p>
-                <ul>
+                <ul data-id="ul">
                     <li>Vorwärts, rückwärts laufen</li>
                     <li>Arme bewegen</li>
                     <li>Beine einzeln bewegen</li>
@@ -210,7 +210,7 @@
             <section data-auto-animate>
                 <h2>Tanz</h2>
                 <h3>Probleme</h3>
-                <ul>
+                <ul data-id="ul">
                     <li>Nicht sehr flüssig</li>
                     <li>Initialisierung dauert lange</li>
                     <li>Nur kleine Bewegungen machbar</li>
@@ -220,7 +220,7 @@
         </section>
         <section>
             <h2>Reveal.js</h2>
-            <ul>
+            <ul data-id="ul">
                 <li>Methode für Präsentationen</li>
                 <li>Open Source</li>
                 <li>HTML/Javascript</li>
@@ -231,7 +231,7 @@
         </section>
         <section>
             <h2 class="r-fit-text">Ende</h2>
-            <ul>
+            <ul data-id="ul">
                 <li>Projekt auf GitHub: siehe Teams</li>
                 <li>Noch Fragen?</li>
                 <li>Danke fürs Zuhören!</li>
