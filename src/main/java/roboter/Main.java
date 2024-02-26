@@ -166,15 +166,15 @@ public class Main {
         robot.say("Hello");
         robot.rotateSingleMotor(robot.getArmsMotor(), speed, RotateAmount.rotations(7), true);
         robot.move(speed.negate(), 7);
-        robot.turn(speed, RotateAmount.degrees(-90));
-        robot.startPlayingFile("song.wav").whenComplete((v, e) -> {
+        robot.turn(speed, RotateAmount.degrees(-45));
+        /*robot.startPlayingFile("song.wav").whenComplete((v, e) -> {
             if ((e) != null) {
                 throw new RuntimeException(e);
             } else System.exit(0);
         });
         LOGGER.info("startPlayingFile returned");
         Button.ENTER.waitForPressAndRelease();
-        robot.stopAudio();
+        robot.stopAudio();*/
         LOGGER.info("stopped");
     }
 
