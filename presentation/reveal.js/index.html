@@ -13,7 +13,7 @@
     <!-- Theme used for syntax highlighted code -->
     <link href="plugin/highlight/monokai.css" rel="stylesheet">
 
-    <!--<link href="ev3.css" rel="stylesheet">-->
+    <link href="ev3.css" rel="stylesheet">
 </head>
 <body>
 <div class="reveal">
@@ -48,48 +48,60 @@
             <!-- video machen, das den Tanz zeigt damit man sich das später noch mal anschauen kann-->
             <section data-auto-animate>
                 <h2>Hardware</h2>
-                <h3>EV3-Stein</h3>
-                <ul data-id="ul">
-                    <li>Steuereinheit des Roboters</li>
-                    <li>Kabel zu allen Motoren & Sensoren</li>
-                </ul>
-                <img alt="Ein Bild des Roboters" data-id="roboter-bild" src="bilder/roboter_brick.jpeg">
+                <h3 data-id="ueberschrift">EV3-Stein</h3>
+                <div class="flex">
+                    <ul data-id="ul">
+                        <li>Steuereinheit des Roboters</li>
+                        <li>Kabel zu allen Motoren & Sensoren</li>
+                    </ul>
+                    <br>
+                    <img alt="Ein Bild des Roboters" data-id="roboter-bild" src="bilder/roboter_brick.jpeg">
+                </div>
             </section>
             <section data-auto-animate>
                 <h2>Hardware</h2>
-                <h3>Arme</h3>
-                <ul data-id="ul">
-                    <li>Können nur zusammen bewegt werden</li>
-                    <li>Hände öffnen und schließen</li>
-                </ul>
-                <img alt="Ein Bild des Roboters" data-id="roboter-bild" src="bilder/roboter_arms.jpeg">
+                <h3 data-id="ueberschrift">Arme</h3>
+                <div class="flex">
+                    <ul data-id="ul">
+                        <li>Können nur zusammen bewegt werden</li>
+                        <li>Hände öffnen und schließen</li>
+                    </ul>
+                    <img alt="Ein Bild des Roboters" data-id="roboter-bild" src="bilder/roboter_arms.jpeg"
+                         style="width:25%">
+                </div>
             </section>
             <section data-auto-animate>
                 <h2>Hardware</h2>
-                <h3>Kopf</h3>
-                <ul data-id="ul">
-                    <li>Entfernungen erkennen</li>
-                    <li>Hier nicht verwendet</li>
-                </ul>
-                <img alt="Ein Bild des Roboters" data-id="roboter-bild" src="bilder/roboter_head.jpeg">
+                <h3 data-id="ueberschrift">Kopf</h3>
+                <div class="flex">
+                    <ul data-id="ul">
+                        <li>Entfernungen erkennen</li>
+                        <li>Hier nicht verwendet</li>
+                    </ul>
+                    <img alt="Ein Bild des Roboters" data-id="roboter-bild" src="bilder/roboter_head.jpeg">
+                </div>
             </section>
             <section data-auto-animate>
                 <h2>Hardware</h2>
-                <h3>Beine</h3>
-                <ul data-id="ul">
-                    <li>Können einzeln bewegt werden</li>
-                    <li>Vorwärts und rückwärts, nicht zur Seite</li>
-                </ul>
-                <img alt="Ein Bild des Roboters" data-id="roboter-bild" src="bilder/roboter_legs.jpeg">
+                <h3 data-id="ueberschrift">Beine</h3>
+                <div class="flex">
+                    <ul data-id="ul">
+                        <li>Können einzeln bewegt werden</li>
+                        <li>Vorwärts und rückwärts, nicht zur Seite</li>
+                    </ul>
+                    <img alt="Ein Bild des Roboters" data-id="roboter-bild" src="bilder/roboter_legs.jpeg">
+                </div>
             </section>
             <section data-auto-animate>
                 <h2>Hardware</h2>
-                <h3>Sensoren</h3>
-                <ul data-id="ul">
-                    <li>Erkennen die Position der Beine</li>
-                    <li>Wenn gedrückt: geben ein Signal aus</li>
-                </ul>
-                <img alt="Ein Bild des Roboters" data-id="roboter-bild" src="bilder/roboter_sensors.jpeg">
+                <h3 data-id="ueberschrift">Sensoren</h3>
+                <div class="flex">
+                    <ul data-id="ul">
+                        <li>Erkennen die Position der Beine</li>
+                        <li>Wenn gedrückt: geben ein Signal aus</li>
+                    </ul>
+                    <img alt="Ein Bild des Roboters" data-id="roboter-bild" src="bilder/roboter_sensors.jpeg">
+                </div>
             </section>
         </section>
         <section>
@@ -121,14 +133,19 @@
             </section>
             <section data-auto-animate>
                 <h2>Betriebssystem</h2>
-                <h3>ev3dev</h3>
-                <ul data-id="ul">
-                    <li>Einfach nur SD-Karte verwenden</li>
-                    <li>Basiert auf Debian Linux</li>
-                    <li>Unterstützt Java, Python und mehr</li>
-                </ul>
-                <img alt="Das Logo von ev3dev" src="https://avatars2.githubusercontent.com/u/6878323"/>
-                <a href="https://ev3dev.org">ev3dev.org</a><br/>
+                <h3 data-id="ueberschrift">ev3dev</h3>
+                <div class="flex">
+                    <ul data-id="ul">
+                        <li>Einfach nur SD-Karte verwenden</li>
+                        <li>Basiert auf Debian Linux</li>
+                        <li>Unterstützt Java, Python und mehr</li>
+                    </ul>
+                    <div>
+                        <img alt="Das Logo von ev3dev" src="https://avatars2.githubusercontent.com/u/6878323"
+                             style="width:100%"/><br/>
+                        <a href="https://ev3dev.org">ev3dev.org</a>
+                    </div>
+                </div>
             </section>
         </section>
         <section>
@@ -141,21 +158,21 @@
                     <li>IntelliJ IDEA, Visual Studio (Code)</li>
                 </ul>
             </section>
-            <section>
-                <img alt="Ein Screenshot der IntelliJ IDEA" src="bilder/IDE.png"/>
-            </section>
-            <section>
+            <section data-auto-animate data-background-image="bilder/IDE.png" data-background-transition="slide">
                 <h2>IDE</h2>
-                <h3>Vorteile</h3>
+            </section>
+            <section data-auto-animate>
+                <h2>IDE</h2>
+                <h3 data-id="ueberschrift">Vorteile</h3>
                 <ul data-id="ul">
                     <li>Effizienz</li>
                     <li>Erweiterbarkeit</li>
                     <li>Gute Benutzeroberfläche/Durchsichtigkeit</li>
                 </ul>
             </section>
-            <section>
+            <section data-auto-animate>
                 <h2>IDE</h2>
-                <h3>Nachteile</h3>
+                <h3 data-id="ueberschrift">Nachteile</h3>
                 <ul data-id="ul">
                     <li>Kosten</li>
                     <li>Gewisse Abhängigkeit</li>
@@ -164,15 +181,16 @@
             </section>
         </section>
         <section>
-            <section>
-                <h2>Programmierung</h2>
+            <section data-auto-animate data-auto-animate-restart>
+                <h2 data-id="ueberschrift">Programmierung</h2>
                 <ul data-id="ul">
                     <li>Beide Motoren gleichzeitig bewegen, um zu laufen</li>
                     <li>Müssen dafür aber genau um 180° versetzt sind</li>
                     <li>Sensoren können die Position finden</li>
                 </ul>
             </section>
-            <section>
+            <section data-auto-animate>
+                <h2 style="font-size: 50%">Programmierung</h2>
                 <pre class="mermaid">
                     flowchart TD
                         subgraph singleMotor[ ]
@@ -192,7 +210,7 @@
                         end
                 </pre>
             </section>
-            <section>
+            <section data-auto-animate>
                 <h2>Programmierung</h2>
                 <p>Der Roboter kann jetzt:</p>
                 <ul data-id="ul">
@@ -209,7 +227,7 @@
             </section>
             <section data-auto-animate>
                 <h2>Tanz</h2>
-                <h3>Probleme</h3>
+                <h3 data-id="ueberschrift">Probleme</h3>
                 <ul data-id="ul">
                     <li>Nicht sehr flüssig</li>
                     <li>Initialisierung dauert lange</li>
@@ -220,22 +238,29 @@
         </section>
         <section>
             <h2>Reveal.js</h2>
-            <ul data-id="ul">
-                <li>Methode für Präsentationen</li>
-                <li>Open Source</li>
-                <li>HTML/Javascript</li>
-                <li>Nur ein Browser notwendig</li>
-            </ul>
-            <p><a href="https://revealjs.com">revealjs.com</a><br>
-            <img alt="Das Logo von reveal.js" src="https://revealjs.com/images/logo/reveal-white-text.svg"></p>
+            <div class="flex">
+                <ul data-id="ul">
+                    <li>Methode für Präsentationen</li>
+                    <li>Open Source</li>
+                    <li>HTML/Javascript</li>
+                    <li>Nur ein Browser notwendig</li>
+                </ul>
+                <div style="flex-grow: 0.5">
+                    <img alt="Das Logo von reveal.js" src="https://revealjs.com/images/logo/reveal-white-text.svg"
+                         style="width: 100%"><br>
+                    <a href="https://revealjs.com">revealjs.com</a>
+                </div>
+            </div>
         </section>
         <section>
-            <h2 class="r-fit-text">Ende</h2>
-            <ul data-id="ul">
-                <li>Projekt auf GitHub: siehe Teams</li>
-                <li>Noch Fragen?</li>
-                <li>Danke fürs Zuhören!</li>
-            </ul>
+            <div class="flex" style="flex-direction:column">
+                <h2 class="r-fit-text">Ende</h2>
+                <ul data-id="ul">
+                    <li>Projekt auf GitHub: siehe Teams</li>
+                    <li>Noch Fragen?</li>
+                    <li>Danke fürs Zuhören!</li>
+                </ul>
+            </div>
         </section>
     </div>
 </div>
