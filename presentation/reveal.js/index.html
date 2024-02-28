@@ -19,7 +19,7 @@
 <div class="reveal">
     <div class="slides">
         <section>
-            <p class="r-fit-text">ROBOTER</p>
+            <h2 class="r-fit-text">ROBOTER</h2>
             <p class="r-fit-text">Von Benjamin und Gustav</p>
         </section>
         <section>
@@ -189,26 +189,27 @@
                     <li>Sensoren können die Position finden</li>
                 </ul>
             </section>
-            <section data-auto-animate>
-                <h2 style="font-size: 50%">Programmierung</h2>
-                <pre class="mermaid">
+            <section data-auto-animate data-state="mermaid-slide">
+                <h2 style="font-size: 75%">Programmierung</h2>
+                <img alt="Ein Flussdiagramm des Algorithmus'" src="bilder/flowchart.svg" style="width:70%">
+                <!--<pre class="mermaid">
                     flowchart TD
                         subgraph singleMotor[ ]
-                        kalibrieren{{Motor kalibrieren}} --> motorDrehen(Motor drehen)
-                        motorDrehen --> sensor?{Sensor gedrückt?}
-                        sensor? -->|Ja| motorStopp(Motor stoppen)
-                        sensor? -->|Nein| warte[kurz warten]
-                        warte --> sensor?
-                        motorStopp --> sStopp{{Stopp}}
+                        kalibrieren{{Motor kalibrieren}} --> <!--motorDrehen(Motor drehen)
+                        motorDrehen --> <!--sensor?{Sensor gedrückt?}
+                        sensor? --><!--|Ja| motorStopp(Motor stoppen)
+                        sensor? --><!--|Nein| warte[kurz warten]
+                        warte --> <!--sensor?
+                        motorStopp --> <!--sStopp{{Stopp}}
                         end
 
                         subgraph main[ ]
-                        start{{Start}} --> links[[Linken Motor \n kalibrieren]]
-                        links --> rechts[[Rechten Motor kalibrieren]]
-                        rechts --> links180(Linken Motor 180° drehen)
-                        links180 --> mStopp{{Stopp}}
+                        start{{Start}} --> <!--links[[Linken Motor \n kalibrieren]]
+                        links --> <!--rechts[[Rechten Motor kalibrieren]]
+                        rechts --> <!--links180(Linken Motor 180° drehen)
+                        links180 --> <!--mStopp{{Stopp}}
                         end
-                </pre>
+                </pre>-->
             </section>
             <section data-auto-animate>
                 <h2>Programmierung</h2>
@@ -253,7 +254,7 @@
             </div>
         </section>
         <section>
-            <div class="flex" style="flex-direction:column">
+            <div class="flex flexCol">
                 <h2 class="r-fit-text">Ende</h2>
                 <ul data-id="ul">
                     <li>Projekt auf GitHub: siehe Teams</li>
@@ -280,9 +281,10 @@
 
         // Learn about plugins: https://revealjs.com/plugins/
         plugins: [ RevealMarkdown, RevealHighlight, RevealNotes, RevealZoom ]
-    }).then( ()=> mermaid.initialize({theme:"dark"}) );
+    }).then( () => {mermaid.initialize({theme:"dark"});} );
 
-    // mermaid.initialize({theme:"dark"});
+    //mermaid.initialize({theme:"dark"});
+    Reveal.on('slidechanged', () => { mermaid.run({}); })
 </script>
 </body>
 </html>
