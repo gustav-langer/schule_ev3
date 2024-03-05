@@ -319,6 +319,12 @@ def generate(index, verbose=True, comment=True, keep_script=False, prettify=Fals
         img['orig-data-src'] = img['data-src']
         img['data-src'] = data_to_base64(index, img['data-src'], verbose=verbose)
 
+    for section in soup('section'):
+        if not section.get('data-background-image'):
+            continue
+        section['orig-data-background-image'] = section['data-background-image']
+        section['data-background-image'] = data_to_base64(index, section['data-background-image'], verbose=verbose)
+
     for tag in soup(True):
         if full_url and tag.name == 'a' and tag.has_attr('href') and not tag['href'].startswith('#'):
             tag['orig-href'] = tag['href']
